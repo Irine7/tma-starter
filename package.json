@@ -1,0 +1,20 @@
+{
+  "name": "tma-boilerplate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-ready Telegram Mini App Boilerplate with Next.js 16 and Express",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "dev:web": "pnpm --filter @tma/web dev",
+    "dev:api": "pnpm --filter @tma/api dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

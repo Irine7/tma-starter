@@ -20,18 +20,21 @@ export const corsMiddleware = () => {
         return callback(null, true);
       }
 
-      // In development, allow all localhost origins
-      if (
-        process.env.NODE_ENV !== 'production' &&
-        origin.includes('localhost')
-      ) {
-        return callback(null, true);
+      // In development, allow localhost and ngrok origins
+      if (process.env.NODE_ENV !== 'production') {
+        if (
+          origin.includes('localhost') ||
+          origin.includes('ngrok-free.app') ||
+          origin.includes('ngrok.io')
+        ) {
+          return callback(null, true);
+        }
       }
 
       callback(new Error(`Origin ${origin} not allowed by CORS`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Telegram-Init-Data'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Telegram-Init-Data', 'ngrok-skip-browser-warning'],
   });
 };

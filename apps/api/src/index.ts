@@ -1,4 +1,8 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load .env from monorepo root
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 import express, { Application } from 'express';
 import { corsMiddleware } from './middleware/cors';
 import {
@@ -6,6 +10,7 @@ import {
   optionalTelegramData,
 } from './middleware/validateTelegramData';
 import healthRoutes from './routes/health';
+import authRoutes from './routes/auth';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
@@ -29,6 +34,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check routes (no auth required)
 app.use('/health', healthRoutes);
+
+// Auth routes (Telegram authentication)
+app.use('/auth', authRoutes);
 
 // Example: Protected route with Telegram validation
 // app.use('/api/user', validateTelegramData, userRoutes);

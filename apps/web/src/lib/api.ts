@@ -7,6 +7,33 @@ import type { ApiResponse, HealthResponse } from '@tma/shared';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+// ===========================================
+// Types
+// ===========================================
+
+export interface User {
+  telegram_id: number;
+  username: string | null;
+  first_name: string;
+  last_name: string | null;
+  language_code: string;
+  is_premium: boolean;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  last_login: string;
+  photo_url: string | null;
+}
+
+export interface LoginResponse {
+  user: User;
+  isNewUser: boolean;
+}
+
+// ===========================================
+// Helpers
+// ===========================================
+
 /**
  * Get the current Telegram initData for API authorization
  */
@@ -33,6 +60,8 @@ async function fetchWithAuth<T>(
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    // Skip ngrok browser warning page
+    'ngrok-skip-browser-warning': 'true',
     ...options.headers,
   };
   
@@ -57,9 +86,56 @@ async function fetchWithAuth<T>(
 }
 
 /**
- * API Client
+ * Fetch wrapper that returns ApiResponse structure
  */
+async function fetchApi<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    // Skip ngrok browser warning page
+    'ngrok-skip-browser-warning': 'true',
+    ...options.headers,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    const data: ApiResponse<T> = await response.json();
+    return data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    return {
+      success: false,
+      error: {
+        code: 'NETWORK_ERROR',
+        message: 'Failed to connect to server',
+      },
+      timestamp: Date.now(),
+    };
+  }
+}
+
+// ===========================================
+// API Client
+// ===========================================
+
 export const api = {
+  /**
+   * Login with Telegram initData
+   * @param initData - The initData string from Telegram WebApp
+   */
+  login: async (initData: string): Promise<ApiResponse<LoginResponse>> => {
+    return fetchApi<LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ initData }),
+    });
+  },
+
   /**
    * Check API health status
    */
@@ -105,3 +181,4 @@ export const api = {
 };
 
 export { API_BASE_URL };
+

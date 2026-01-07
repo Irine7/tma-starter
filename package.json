@@ -11,7 +11,10 @@
     "dev:api": "pnpm --filter @tma/api dev",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
-    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml"
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml",
+    "tunnel": "ngrok start --config ngrok.yml --all",
+    "tunnel:web": "ngrok http 3000",
+    "tunnel:api": "ngrok http 3001"
   },
   "engines": {
     "node": ">=18.0.0",

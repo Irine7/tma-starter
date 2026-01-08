@@ -5,7 +5,24 @@ import type { ApiResponse, HealthResponse } from '@tma/shared';
  * Handles communication with the backend API
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+/**
+ * Get the correct API base URL based on environment
+ * - In Telegram WebApp: use NEXT_PUBLIC_API_URL (ngrok)
+ * - In browser (mock mode): use localhost
+ */
+function getApiBaseUrl(): string {
+  // Check if we're in Telegram Mini App
+  if (typeof window !== 'undefined') {
+    const webApp = window.Telegram?.WebApp;
+    if (webApp?.initData) {
+      // Real Telegram environment - use ngrok URL
+      return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    }
+  }
+  
+  // Browser/mock mode - always use localhost
+  return 'http://localhost:3001';
+}
 
 // ===========================================
 // Types
@@ -73,7 +90,8 @@ async function fetchWithAuth<T>(
     (headers as Record<string, string>)['Authorization'] = `tma ${initData}`;
   }
   
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const apiBaseUrl = getApiBaseUrl();
+  const response = await fetch(`${apiBaseUrl}${endpoint}`, {
     ...options,
     headers,
   });
@@ -103,7 +121,8 @@ async function fetchApi<T>(
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}${endpoint}`, {
       ...options,
       headers,
     });
@@ -195,5 +214,5 @@ export const api = {
   },
 };
 
-export { API_BASE_URL };
+export { getApiBaseUrl };
 

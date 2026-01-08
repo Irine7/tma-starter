@@ -23,11 +23,14 @@ export interface User {
   updated_at: string;
   last_login: string;
   photo_url: string | null;
+  referrer_id: number | null;
+  referral_code?: string; // Optional as it might not be in all responses
 }
 
 export interface LoginResponse {
   user: User;
   isNewUser: boolean;
+  referralApplied: boolean;
 }
 
 // ===========================================
@@ -127,6 +130,10 @@ async function fetchApi<T>(
 export const api = {
   /**
    * Login with Telegram initData
+   * 
+   * Security Note: referralCode is extracted from initData.start_param on server
+   * after validation. Never send it as a separate parameter.
+   * 
    * @param initData - The initData string from Telegram WebApp
    */
   login: async (initData: string): Promise<ApiResponse<LoginResponse>> => {
@@ -141,6 +148,14 @@ export const api = {
    */
   health: async (): Promise<HealthResponse> => {
     return fetchWithAuth<HealthResponse>('/health');
+  },
+
+  /**
+   * Get list of users referred by a user
+   * @param telegramId - Telegram ID of the user
+   */
+  getReferrals: async (telegramId: number): Promise<ApiResponse<User[]>> => {
+    return fetchApi<User[]>(`/auth/referrals?telegram_id=${telegramId}`);
   },
   
   /**

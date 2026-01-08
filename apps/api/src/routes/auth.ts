@@ -9,6 +9,8 @@ import {
   validateTelegramData,
   parseInitData,
   upsertUser,
+  getUserByTelegramId,
+  getReferrals,
   DbUser,
 } from '../services/auth.service';
 import { ApiResponse } from '@tma/shared';
@@ -21,11 +23,14 @@ const router: IRouter = Router();
 
 interface LoginRequest {
   initData: string;
+  // NOTE: referralCode is NOT accepted here for security reasons
+  // It must be extracted from validated initData.start_param on server
 }
 
 interface LoginResponse {
   user: DbUser;
   isNewUser: boolean;
+  referralApplied: boolean;
 }
 
 // ===========================================
@@ -61,7 +66,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    // Validate Telegram signature
+    // Validate Telegram signature FIRST
     const isValid = validateTelegramData(initData);
 
     if (!isValid) {
@@ -93,8 +98,20 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    // Upsert user to database
-    const dbUser = await upsertUser(parsed.user);
+    // ✅ SECURITY: Extract referral code from VALIDATED initData
+    // Never trust client-provided referralCode as separate parameter
+    const referralCode = parsed.start_param;
+    
+    if (referralCode) {
+      console.log(`🔗 Referral code from validated initData: ${referralCode}`);
+    }
+
+    // Check if user exists before upsert
+    const existingUser = await getUserByTelegramId(parsed.user.id);
+    const wasNewUser = !existingUser;
+
+    // Upsert user to database with referral code from validated initData
+    const dbUser = await upsertUser(parsed.user, referralCode);
 
     if (!dbUser) {
       const response: ApiResponse<null> = {
@@ -114,12 +131,16 @@ router.post('/login', async (req: Request, res: Response) => {
     const updatedAt = new Date(dbUser.updated_at).getTime();
     const isNewUser = Math.abs(updatedAt - createdAt) < 1000;
 
+    // Check if referral was applied
+    const referralApplied = wasNewUser && !!referralCode && !!dbUser.referrer_id;
+
     // Success response
     const response: ApiResponse<LoginResponse> = {
       success: true,
       data: {
         user: dbUser,
         isNewUser,
+        referralApplied,
       },
       timestamp: Date.now(),
     };
@@ -163,6 +184,58 @@ router.get('/me', (req: Request, res: Response) => {
   };
 
   res.status(501).json(response);
+});
+
+/**
+ * GET /auth/referrals
+ *
+ * Returns list of users referred by the authenticated user.
+ * For now, expects telegram_id as query parameter.
+ * TODO: Add proper authentication middleware
+ */
+router.get('/referrals', async (req: Request, res: Response) => {
+  try {
+    const telegramId = req.query.telegram_id as string;
+
+    if (!telegramId) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'MISSING_TELEGRAM_ID',
+          message: 'telegram_id query parameter is required',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const referrals = await getReferrals(parseInt(telegramId, 10));
+
+    const response: ApiResponse<DbUser[]> = {
+      success: true,
+      data: referrals,
+      timestamp: Date.now(),
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('❌ Error fetching referrals:', error);
+
+    const response: ApiResponse<null> = {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message:
+          process.env.NODE_ENV === 'production'
+            ? 'An unexpected error occurred'
+            : (error as Error).message,
+      },
+      timestamp: Date.now(),
+    };
+
+    res.status(500).json(response);
+  }
 });
 
 export default router;

@@ -5,6 +5,7 @@ import { useTelegramUser } from '@/hooks/useTelegramUser';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import type { HealthResponse } from '@tma/shared';
+import { ReferralCard } from '@/components/ReferralCard';
 
 export default function Home() {
   const { user, isLoading, isMockMode, isInTelegram } = useTelegramUser();
@@ -175,6 +176,15 @@ export default function Home() {
             )}
           </div>
         </section>
+
+				{/* Referral System */}
+				<section className="rounded-2xl border bg-card p-6 shadow-sm">
+					<h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
+						<span className="text-2xl">🔗</span>
+						Referral System
+					</h2>
+					<ReferralCard />
+				</section>
 
         {/* Quick Links */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">

@@ -58,42 +58,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * Login with Telegram initData
    */
-  const login = useCallback(async (initData: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
+  const login = useCallback(
+    async (initData: string): Promise<boolean> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const response = await api.login(initData);
+      try {
+        const response = await api.login(initData);
 
-      if (response.success && response.data) {
-        setUser(response.data.user);
-        
-        // Store in localStorage for persistence
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('tma_user', JSON.stringify(response.data.user));
+        if (response.success && response.data) {
+          setUser(response.data.user);
+
+          // Store in localStorage for persistence
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(
+              'tma_user',
+              JSON.stringify(response.data.user)
+            );
+          }
+
+          console.log(
+            `✅ Logged in as ${response.data.user.first_name}`,
+            response.data.isNewUser ? '(new user)' : ''
+          );
+
+          if (response.data.referralApplied) {
+            console.log('🎉 Referral applied successfully!');
+          }
+
+          return true;
+        } else {
+          const errorMessage = response.error?.message || 'Login failed';
+          setError(errorMessage);
+          console.error('❌ Login failed:', errorMessage);
+          return false;
         }
-        
-        console.log(
-          `✅ Logged in as ${response.data.user.first_name}`,
-          response.data.isNewUser ? '(new user)' : ''
-        );
-        
-        return true;
-      } else {
-        const errorMessage = response.error?.message || 'Login failed';
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
-        console.error('❌ Login failed:', errorMessage);
+        console.error('❌ Login error:', err);
         return false;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
-      console.error('❌ Login error:', err);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   /**
    * Logout - clear user state
@@ -149,6 +159,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (webApp?.initData) {
           // Real Telegram environment
           console.log('🔐 Authenticating with Telegram...');
+          
+          // ✅ SECURITY: Send only initData
+          // Server will extract start_param from validated initData
           await login(webApp.initData);
         } else if (process.env.NODE_ENV === 'development') {
           // Development mock mode

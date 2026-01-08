@@ -43,6 +43,8 @@ export interface DbUser {
   updated_at: string;
   last_login: string;
   photo_url: string | null;
+  referrer_id: number | null;
+  referral_code: string;
 }
 
 // ===========================================
@@ -140,7 +142,7 @@ export function parseInitData(initData: string): ParsedInitData | null {
   try {
     // Handle mock data
     if (initData === 'mock_data' || initData.startsWith('mock_')) {
-      return getMockParsedData();
+      return getMockParsedData(initData);
     }
 
     const params = new URLSearchParams(initData);
@@ -172,20 +174,69 @@ export function parseInitData(initData: string): ParsedInitData | null {
 
 /**
  * Returns mock user data for development
+ * @param initData - The mock initData string to generate unique user from
+ * 
+ * Format: mock_data or mock_identifier or mock_identifier|start_param
+ * Examples:
+ *   - "mock_data" → default test user
+ *   - "mock_user_b" → user B
+ *   - "mock_user_b|r8d3d17b1e6b8ed5" → user B with referral code
  */
-function getMockParsedData(): ParsedInitData {
+function getMockParsedData(initData: string = 'mock_data'): ParsedInitData {
+  // Extract start_param if present (format: mock_user_b|referral_code)
+  let startParam: string | undefined;
+  let identifier = initData;
+  
+  if (initData.includes('|')) {
+    const parts = initData.split('|');
+    identifier = parts[0];
+    startParam = parts[1];
+  }
+  
+  // Generate different user IDs based on mock identifier
+  let userId: number;
+  let username: string;
+  let firstName: string;
+  
+  if (identifier === 'mock_data') {
+    userId = 123456789;
+    username = 'testuser';
+    firstName = 'Test';
+  } else {
+    // Extract identifier from mock_user_b, mock_user_c, etc.
+    const userIdentifier = identifier.replace('mock_', '');
+    // Generate consistent user ID from string hash
+    userId = Math.abs(hashCode(userIdentifier)) % 1000000000;
+    username = userIdentifier.replace('_', '');
+    firstName = userIdentifier.charAt(0).toUpperCase() + userIdentifier.slice(1).replace('_', ' ');
+  }
+
   return {
     user: {
-      id: 123456789,
-      first_name: 'Test',
+      id: userId,
+      first_name: firstName,
       last_name: 'User',
-      username: 'testuser',
+      username: username,
       language_code: 'en',
       is_premium: false,
     },
     auth_date: Math.floor(Date.now() / 1000),
     hash: 'mock_hash',
+    start_param: startParam, // Include start_param from mock data
   };
+}
+
+/**
+ * Simple string hash function for generating consistent user IDs
+ */
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
 }
 
 // ===========================================
@@ -197,10 +248,12 @@ function getMockParsedData(): ParsedInitData {
  * Creates new user or updates existing one based on telegram_id.
  *
  * @param telegramUser - User data from Telegram
+ * @param referralCode - Optional referral code from start_param
  * @returns Database user record
  */
 export async function upsertUser(
-  telegramUser: TelegramUser
+  telegramUser: TelegramUser,
+  referralCode?: string
 ): Promise<DbUser | null> {
   if (!isSupabaseConfigured()) {
     console.warn('⚠️  Supabase not configured, returning mock user');
@@ -208,6 +261,32 @@ export async function upsertUser(
   }
 
   try {
+    // First, check if user exists
+    const existingUser = await getUserByTelegramId(telegramUser.id);
+    const isNewUser = !existingUser;
+
+    let referrerId: number | null = null;
+
+    // Process referral code only for new users
+    if (isNewUser && referralCode) {
+      console.log(`🔗 Processing referral code: ${referralCode}`);
+      const referrer = await getUserByReferralCode(referralCode);
+
+      if (referrer) {
+        // Prevent self-referral
+        if (referrer.telegram_id === telegramUser.id) {
+          console.warn('⚠️  Self-referral attempt blocked');
+        } else {
+          referrerId = referrer.telegram_id;
+          console.log(
+            `✅ Referral valid: User ${telegramUser.id} referred by ${referrerId}`
+          );
+        }
+      } else {
+        console.warn(`⚠️  Invalid referral code: ${referralCode}`);
+      }
+    }
+
     const { data, error } = await supabaseAdmin
       .from('users')
       .upsert(
@@ -220,6 +299,7 @@ export async function upsertUser(
           is_premium: telegramUser.is_premium || false,
           photo_url: telegramUser.photo_url || null,
           last_login: new Date().toISOString(),
+          ...(isNewUser && referrerId ? { referrer_id: referrerId } : {}),
         },
         {
           onConflict: 'telegram_id',
@@ -258,6 +338,8 @@ function getMockDbUser(telegramUser: TelegramUser): DbUser {
     updated_at: now,
     last_login: now,
     photo_url: telegramUser.photo_url || null,
+    referrer_id: null,
+    referral_code: `r${telegramUser.id.toString().substring(0, 15)}`,
   };
 }
 
@@ -293,3 +375,66 @@ export async function getUserByTelegramId(
     return null;
   }
 }
+
+/**
+ * Get user by referral code
+ */
+export async function getUserByReferralCode(
+  referralCode: string
+): Promise<DbUser | null> {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('referral_code', referralCode)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        return null;
+      }
+      console.error('❌ Error fetching user by referral code:', error);
+      return null;
+    }
+
+    return data as DbUser;
+  } catch (error) {
+    console.error('❌ Unexpected error fetching user by referral code:', error);
+    return null;
+  }
+}
+
+/**
+ * Get list of users referred by a user
+ */
+export async function getReferrals(
+  telegramId: number
+): Promise<DbUser[]> {
+  if (!isSupabaseConfigured()) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('referrer_id', telegramId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching referrals:', error);
+      return [];
+    }
+
+    return (data as DbUser[]) || [];
+  } catch (error) {
+    console.error('❌ Unexpected error fetching referrals:', error);
+    return [];
+  }
+}
+

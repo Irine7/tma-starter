@@ -129,9 +129,9 @@ export default function Home() {
               <p className="text-sm text-muted-foreground">Mock Mode</p>
               <p className="text-lg font-semibold mt-1">
                 {isMockMode ? (
-                  <span className="text-amber-600 dark:text-amber-400">✓ Active</span>
+                  <span className="text-green-600 dark:text-green-400">✓ Active</span>
                 ) : (
-                  <span className="text-green-600 dark:text-green-400">✗ Disabled</span>
+                  <span className="text-amber-600 dark:text-amber-400">✗ Disabled</span>
                 )}
               </p>
             </div>

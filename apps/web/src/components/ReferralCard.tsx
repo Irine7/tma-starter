@@ -52,12 +52,17 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
       return;
     }
 
-    const referralUrl = `https://t.me/tma_boilerplate_bot?startapp=${user.referral_code}`;
+    const referralUrl = `https://t.me/tma_boilerplate_bot/tma_boilerplate?startapp=${user.referral_code}`;
 
-    // Try to use Telegram WebApp API
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    // Check if we're actually running inside Telegram WebApp
+    const isInTelegram = typeof window !== 'undefined' && 
+                         window.Telegram?.WebApp?.platform && 
+                         window.Telegram.WebApp.platform !== 'unknown';
+
+    // Try to use Telegram WebApp API if we're in Telegram
+    if (isInTelegram) {
       try {
-        window.Telegram.WebApp.openTelegramLink(referralUrl);
+        window.Telegram!.WebApp.openTelegramLink(referralUrl);
         return;
       } catch (error) {
         console.warn('Failed to open Telegram link:', error);
@@ -66,9 +71,16 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
 
     // Fallback: Open in new window (browser mode)
     if (typeof window !== 'undefined') {
-      window.open(referralUrl, '_blank', 'noopener,noreferrer');
-      // Also copy to clipboard
-      copyToClipboard(referralUrl);
+      const newWindow = window.open(referralUrl, '_blank', 'noopener,noreferrer');
+      
+      // If popup was blocked, copy to clipboard and notify user
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        copyToClipboard(referralUrl);
+        alert('Please enable popups or use the copied link from your clipboard!');
+      } else {
+        // Also copy to clipboard for convenience
+        copyToClipboard(referralUrl);
+      }
     }
   };
 

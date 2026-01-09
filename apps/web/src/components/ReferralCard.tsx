@@ -153,8 +153,8 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
 
   if (authLoading) {
     return (
-      <div className={`referral-card ${className}`}>
-        <div className="loading">Loading...</div>
+      <div className={className}>
+        <div className="text-center py-8 text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -162,8 +162,8 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
   if (!user) {
     console.log('ReferralCard: No user available');
     return (
-      <div className={`referral-card ${className}`}>
-        <div className="empty-state">
+      <div className={className}>
+        <div className="text-center py-8 px-4 text-muted-foreground">
           <p>Please login to view referral information</p>
         </div>
       </div>
@@ -173,23 +173,35 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
   console.log('ReferralCard: User loaded', { telegram_id: user.telegram_id, referral_code: user.referral_code });
 
   return (
-    <div className={`referral-card ${className}`}>
-      <div className="referral-header">
-        <h2>🎁 Invite Friends</h2>
-        <p className="referral-code">
-          Your code: <code>{user.referral_code || 'Loading...'}</code>
+    <div className={className}>
+      {/* Header */}
+      <div className="text-center mb-5">
+        <h2 className="text-2xl font-semibold text-foreground mb-2">
+          🎁 Invite Friends
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Your code:{' '}
+          <code className="bg-secondary px-2 py-1 rounded font-mono text-foreground">
+            {user.referral_code || 'Loading...'}
+          </code>
         </p>
       </div>
 
-      <div className="referral-stats">
-        <div className="stat-item">
-          <span className="stat-value">{referrals.length}</span>
-          <span className="stat-label">Friends Invited</span>
+      {/* Stats */}
+      <div className="flex justify-center gap-5 mb-5">
+        <div className="flex flex-col items-center px-4 py-4 bg-secondary rounded-lg min-w-[100px]">
+          <span className="text-[32px] font-bold text-primary">
+            {referrals.length}
+          </span>
+          <span className="text-xs text-muted-foreground mt-1">
+            Friends Invited
+          </span>
         </div>
       </div>
 
+      {/* Invite Button */}
       <button 
-        className="invite-button" 
+        className="w-full py-3.5 bg-primary text-primary-foreground rounded-lg text-base font-semibold transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={handleInviteFriend}
         disabled={!user.referral_code}
       >
@@ -199,7 +211,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
       {/* Debug button for development */}
       {process.env.NODE_ENV === 'development' && (
         <button 
-          className="debug-button" 
+          className="w-full py-3 mt-2 bg-secondary text-foreground border-2 border-dashed border-muted-foreground rounded-lg text-sm font-semibold transition-all hover:bg-muted hover:border-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleDebugAddReferral}
           disabled={isCreatingDebugReferral || !user.referral_code}
         >
@@ -207,27 +219,43 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
         </button>
       )}
 
+      {/* Loading State */}
       {isLoadingReferrals && (
-        <div className="referrals-loading">Loading referrals...</div>
+        <div className="text-center py-3 mt-4 rounded-md text-muted-foreground">
+          Loading referrals...
+        </div>
       )}
 
-      {error && <div className="referrals-error">Error: {error}</div>}
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-3 mt-4 rounded-md bg-destructive/10 text-destructive">
+          Error: {error}
+        </div>
+      )}
 
+      {/* Referrals List */}
       {!isLoadingReferrals && referrals.length > 0 && (
-        <div className="referrals-list">
-          <h3>Your Referrals</h3>
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold text-foreground mb-3">
+            Your Referrals
+          </h3>
           {referrals.map((referral) => (
-            <div key={referral.telegram_id} className="referral-item">
-              <div className="referral-info">
-                <span className="referral-name">
+            <div 
+              key={referral.telegram_id} 
+              className="flex justify-between items-center p-3 bg-secondary rounded-lg mb-2"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-foreground">
                   {referral.first_name}
                   {referral.last_name ? ` ${referral.last_name}` : ''}
                 </span>
                 {referral.username && (
-                  <span className="referral-username">@{referral.username}</span>
+                  <span className="text-sm text-muted-foreground">
+                    @{referral.username}
+                  </span>
                 )}
               </div>
-              <div className="referral-date">
+              <div className="text-xs text-muted-foreground">
                 {new Date(referral.created_at).toLocaleDateString()}
               </div>
             </div>
@@ -235,202 +263,12 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
         </div>
       )}
 
+      {/* Empty State */}
       {!isLoadingReferrals && referrals.length === 0 && (
-        <div className="empty-state">
+        <div className="text-center py-8 px-4 text-muted-foreground">
           <p>No referrals yet. Share your link to get started!</p>
         </div>
       )}
-
-      <style jsx>{`
-        .referral-card {
-          background: var(--tg-theme-bg-color, #ffffff);
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .referral-header {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-
-        .referral-header h2 {
-          margin: 0 0 8px 0;
-          color: var(--tg-theme-text-color, #000000);
-          font-size: 24px;
-        }
-
-        .referral-code {
-          margin: 0;
-          color: var(--tg-theme-hint-color, #999999);
-          font-size: 14px;
-        }
-
-        .referral-code code {
-          background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-family: monospace;
-          color: var(--tg-theme-text-color, #000000);
-        }
-
-        .referral-stats {
-          display: flex;
-          justify-content: center;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 16px;
-          background: var(--tg-theme-secondary-bg-color, #f7f7f7);
-          border-radius: 8px;
-          min-width: 100px;
-        }
-
-        .stat-value {
-          font-size: 32px;
-          font-weight: bold;
-          color: var(--tg-theme-button-color, #3390ec);
-        }
-
-        .stat-label {
-          font-size: 12px;
-          color: var(--tg-theme-hint-color, #999999);
-          margin-top: 4px;
-        }
-
-        .invite-button {
-          width: 100%;
-          padding: 14px;
-          background: var(--tg-theme-button-color, #3390ec);
-          color: var(--tg-theme-button-text-color, #ffffff);
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: opacity 0.2s;
-        }
-
-        .invite-button:hover {
-          opacity: 0.9;
-        }
-
-        .invite-button:active {
-          opacity: 0.8;
-        }
-        
-        .invite-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .debug-button {
-          width: 100%;
-          padding: 12px;
-          margin-top: 8px;
-          background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-          color: var(--tg-theme-text-color, #000000);
-          border: 2px dashed var(--tg-theme-hint-color, #999999);
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .debug-button:hover {
-          background: var(--tg-theme-hint-color, #e0e0e0);
-          border-color: var(--tg-theme-button-color, #3390ec);
-        }
-
-        .debug-button:active {
-          transform: scale(0.98);
-        }
-
-        .debug-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .referrals-loading,
-        .referrals-error {
-          text-align: center;
-          padding: 12px;
-          margin-top: 16px;
-          border-radius: 6px;
-        }
-
-        .referrals-loading {
-          color: var(--tg-theme-hint-color, #999999);
-        }
-
-        .referrals-error {
-          color: #ff3b30;
-          background: rgba(255, 59, 48, 0.1);
-        }
-
-        .referrals-list {
-          margin-top: 24px;
-        }
-
-        .referrals-list h3 {
-          margin: 0 0 12px 0;
-          color: var(--tg-theme-text-color, #000000);
-          font-size: 18px;
-        }
-
-        .referral-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px;
-          background: var(--tg-theme-secondary-bg-color, #f7f7f7);
-          border-radius: 8px;
-          margin-bottom: 8px;
-        }
-
-        .referral-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .referral-name {
-          font-weight: 600;
-          color: var(--tg-theme-text-color, #000000);
-        }
-
-        .referral-username {
-          font-size: 14px;
-          color: var(--tg-theme-hint-color, #999999);
-        }
-
-        .referral-date {
-          font-size: 12px;
-          color: var(--tg-theme-hint-color, #999999);
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 32px 16px;
-          color: var(--tg-theme-hint-color, #999999);
-        }
-
-        .empty-state p {
-          margin: 0;
-        }
-
-        .loading {
-          text-align: center;
-          padding: 32px;
-          color: var(--tg-theme-hint-color, #999999);
-        }
-      `}</style>
     </div>
   );
 }

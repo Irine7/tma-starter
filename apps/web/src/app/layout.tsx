@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { MockTelegramProvider } from "@/components/providers/MockTelegramProvider";
+import { TelegramThemeProvider } from "@/components/providers/TelegramThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { BottomNav } from "@/components/BottomNav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,9 +48,12 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <MockTelegramProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <TelegramThemeProvider>
+            <AuthProvider>
+              {children}
+              <BottomNav />
+            </AuthProvider>
+          </TelegramThemeProvider>
         </MockTelegramProvider>
       </body>
     </html>

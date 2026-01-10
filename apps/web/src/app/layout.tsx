@@ -4,6 +4,7 @@ import "./globals.css";
 import { MockTelegramProvider } from "@/components/providers/MockTelegramProvider";
 import { TelegramThemeProvider } from "@/components/providers/TelegramThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TonConnectProvider } from "@/components/providers/TonConnectProvider";
 import { BottomNav } from "@/components/BottomNav";
 
 const inter = Inter({
@@ -49,10 +50,12 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <MockTelegramProvider>
           <TelegramThemeProvider>
-            <AuthProvider>
-              {children}
-              <BottomNav />
-            </AuthProvider>
+            <TonConnectProvider>
+              <AuthProvider>
+                {children}
+                <BottomNav />
+              </AuthProvider>
+            </TonConnectProvider>
           </TelegramThemeProvider>
         </MockTelegramProvider>
       </body>

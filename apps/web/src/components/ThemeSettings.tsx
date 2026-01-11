@@ -1,12 +1,9 @@
-/**
- * Theme Settings Component
- * Allows users to manually select light, dark, or system theme
- */
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { setThemePreference, getThemePreference } from '@/components/providers/TelegramThemeProvider';
+import { Monitor, Moon, Sun } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function ThemeSettings() {
   const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -20,38 +17,33 @@ export function ThemeSettings() {
     setCurrentTheme(theme);
   };
 
-  const themes: Array<{ value: 'light' | 'dark' | 'system'; label: string; icon: string }> = [
-    { value: 'light', label: 'Light', icon: '☀️' },
-    { value: 'dark', label: 'Dark', icon: '🌙' },
-    { value: 'system', label: 'System', icon: '🔄' },
-  ];
+  const themes = [
+    { value: 'system', icon: Monitor },
+    { value: 'light', icon: Sun },
+    { value: 'dark', icon: Moon },
+  ] as const;
 
   return (
-    <div className="space-y-2">
-      {themes.map((theme) => (
-        <button
-          key={theme.value}
-          onClick={() => handleThemeChange(theme.value)}
-          className={`
-            w-full p-3 rounded-lg border text-left flex items-center gap-3 transition-all
-            ${currentTheme === theme.value
-              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-              : 'bg-secondary border-border hover:border-primary/50 hover:bg-secondary/80'
-            }
-          `}
-        >
-          <span className="text-xl">{theme.icon}</span>
-          <div className="flex-1">
-            <div className="font-medium">{theme.label}</div>
-            {currentTheme === theme.value && (
-              <div className="text-xs opacity-80">Active</div>
+    <div className="flex w-fit items-center rounded-full bg-secondary/50 p-1 ring-1 ring-border">
+      {themes.map((theme) => {
+        const Icon = theme.icon;
+        const isActive = currentTheme === theme.value;
+        return (
+          <button
+            key={theme.value}
+            onClick={() => handleThemeChange(theme.value)}
+            className={cn(
+              "rounded-full p-2.5 transition-all duration-200",
+              isActive 
+                ? "bg-primary text-primary-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground"
             )}
-          </div>
-          {currentTheme === theme.value && (
-            <span className="text-lg">✓</span>
-          )}
-        </button>
-      ))}
+            aria-label={`Select ${theme.value} theme`}
+          >
+            <Icon className="size-5" />
+          </button>
+        );
+      })}
     </div>
   );
 }

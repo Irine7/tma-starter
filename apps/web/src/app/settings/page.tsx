@@ -14,14 +14,16 @@ export default function SettingsPage() {
 
         {/* Appearance Section */}
         <section className="mb-8">
-          <div className="rounded-2xl border bg-card p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-card-foreground mb-1 flex items-center gap-2">
-              <span className="text-2xl">🎨</span>
-              Appearance
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Customize how the app looks
-            </p>
+          <div className="flex items-center justify-between rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                <span className="text-2xl">🎨</span>
+                Appearance
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Customize how the app looks
+              </p>
+            </div>
             <ThemeSettings />
           </div>
         </section>

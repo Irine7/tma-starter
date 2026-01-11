@@ -101,16 +101,13 @@ export function MockTelegramProvider({ children }: MockTelegramProviderProps) {
     <TelegramContext.Provider value={contextValue}>
       {/* Development Mode Banner */}
       {contextValue.isMockMode && !contextValue.isLoading && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 text-center py-1.5 text-sm font-medium shadow-md">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-primary text-center py-1.5 text-sm font-medium shadow-md">
           <span className="mr-2">🔧</span>
           Development Mode — Using mock Telegram data
         </div>
       )}
       
-      {/* Add padding when banner is visible */}
-      <div className={contextValue.isMockMode ? 'pt-9' : ''}>
-        {children}
-      </div>
+      {children}
     </TelegramContext.Provider>
   );
 }

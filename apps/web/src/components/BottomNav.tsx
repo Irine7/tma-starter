@@ -68,7 +68,7 @@ export function BottomNav() {
                 <div className={`
                   transition-all duration-200
                   ${isActive 
-                    ? 'text-emerald-500 dark:text-emerald-400' 
+                    ? 'text-primary dark:text-primary' 
                     : 'text-muted-foreground hover:text-foreground'
                   }
                 `}>
@@ -77,7 +77,7 @@ export function BottomNav() {
                 <span className={`
                   text-xs font-medium transition-colors
                   ${isActive 
-                    ? 'text-emerald-500 dark:text-emerald-400' 
+                    ? 'text-primary dark:text-primary' 
                     : 'text-muted-foreground'
                   }
                 `}>

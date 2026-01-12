@@ -52,7 +52,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
       return;
     }
 
-    const referralUrl = `https://t.me/tma_boilerplate_bot/tma_boilerplate?startapp=${user.referral_code}`;
+    const referralUrl = `https://t.me/tma_starter_bot/starter?startapp=${user.referral_code}`;
 
     // Check if we're actually running inside Telegram WebApp
     const isInTelegram = typeof window !== 'undefined' && 

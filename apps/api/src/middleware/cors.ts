@@ -20,12 +20,13 @@ export const corsMiddleware = () => {
         return callback(null, true);
       }
 
-      // In development, allow localhost and ngrok origins
+      // In development, allow localhost and tunnel origins
       if (process.env.NODE_ENV !== 'production') {
         if (
           origin.includes('localhost') ||
           origin.includes('ngrok-free.app') ||
-          origin.includes('ngrok.io')
+          origin.includes('ngrok.io') ||
+          origin.includes('trycloudflare.com')
         ) {
           return callback(null, true);
         }

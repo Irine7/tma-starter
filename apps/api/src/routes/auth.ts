@@ -11,7 +11,10 @@ import {
   upsertUser,
   getUserByTelegramId,
   getReferrals,
+  connectWallet,
+  disconnectWallet,
   DbUser,
+  WalletConnectionData,
 } from '../services/auth.service';
 import { ApiResponse } from '@tma/shared';
 
@@ -221,6 +224,156 @@ router.get('/referrals', async (req: Request, res: Response) => {
     res.json(response);
   } catch (error) {
     console.error('❌ Error fetching referrals:', error);
+
+    const response: ApiResponse<null> = {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message:
+          process.env.NODE_ENV === 'production'
+            ? 'An unexpected error occurred'
+            : (error as Error).message,
+      },
+      timestamp: Date.now(),
+    };
+
+    res.status(500).json(response);
+  }
+});
+
+// ===========================================
+// Wallet Routes
+// ===========================================
+
+/**
+ * POST /auth/wallet/connect
+ *
+ * Connects a TON wallet to the authenticated user.
+ * Requires telegram_id and wallet data.
+ */
+router.post('/wallet/connect', async (req: Request, res: Response) => {
+  try {
+    const { telegram_id, wallet } = req.body as {
+      telegram_id: number;
+      wallet: WalletConnectionData;
+    };
+
+    // Validate input
+    if (!telegram_id) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'MISSING_TELEGRAM_ID',
+          message: 'telegram_id is required',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    if (!wallet || !wallet.address || !wallet.addressFriendly) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'MISSING_WALLET_DATA',
+          message: 'wallet data with address and addressFriendly is required',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const updatedUser = await connectWallet(telegram_id, wallet);
+
+    if (!updatedUser) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'WALLET_CONNECT_FAILED',
+          message: 'Failed to connect wallet. It may already be connected to another user.',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const response: ApiResponse<DbUser> = {
+      success: true,
+      data: updatedUser,
+      timestamp: Date.now(),
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('❌ Error connecting wallet:', error);
+
+    const response: ApiResponse<null> = {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message:
+          process.env.NODE_ENV === 'production'
+            ? 'An unexpected error occurred'
+            : (error as Error).message,
+      },
+      timestamp: Date.now(),
+    };
+
+    res.status(500).json(response);
+  }
+});
+
+/**
+ * POST /auth/wallet/disconnect
+ *
+ * Disconnects a TON wallet from the authenticated user.
+ * Requires telegram_id.
+ */
+router.post('/wallet/disconnect', async (req: Request, res: Response) => {
+  try {
+    const { telegram_id } = req.body as { telegram_id: number };
+
+    // Validate input
+    if (!telegram_id) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'MISSING_TELEGRAM_ID',
+          message: 'telegram_id is required',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const updatedUser = await disconnectWallet(telegram_id);
+
+    if (!updatedUser) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: {
+          code: 'WALLET_DISCONNECT_FAILED',
+          message: 'Failed to disconnect wallet',
+        },
+        timestamp: Date.now(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const response: ApiResponse<DbUser> = {
+      success: true,
+      data: updatedUser,
+      timestamp: Date.now(),
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('❌ Error disconnecting wallet:', error);
 
     const response: ApiResponse<null> = {
       success: false,

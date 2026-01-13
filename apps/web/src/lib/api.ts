@@ -42,6 +42,14 @@ export interface User {
   photo_url: string | null;
   referrer_id: number | null;
   referral_code?: string; // Optional as it might not be in all responses
+  
+  // Wallet connection fields
+  wallet_address: string | null;
+  wallet_address_friendly: string | null;
+  wallet_connected: boolean;
+  wallet_connected_at: string | null;
+  wallet_chain: number | null; // mainnet: -239, testnet: -3
+  wallet_app_name: string | null;
 }
 
 export interface LoginResponse {
@@ -130,12 +138,18 @@ async function fetchApi<T>(
     const data: ApiResponse<T> = await response.json();
     return data;
   } catch (error) {
-    console.error('API request failed:', error);
+    const apiBaseUrl = getApiBaseUrl();
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`API request failed [${endpoint}]:`, {
+      error,
+      apiBaseUrl,
+      endpoint,
+    });
     return {
       success: false,
       error: {
         code: 'NETWORK_ERROR',
-        message: 'Failed to connect to server',
+        message: `Failed to connect to server: ${errorMessage}`,
       },
       timestamp: Date.now(),
     };
@@ -212,7 +226,54 @@ export const api = {
       method: 'DELETE',
     });
   },
+
+  // ===========================================
+  // Wallet Methods
+  // ===========================================
+
+  /**
+   * Connect a TON wallet to the user
+   * @param telegramId - User's Telegram ID
+   * @param wallet - Wallet connection data
+   */
+  connectWallet: async (
+    telegramId: number,
+    wallet: WalletConnectionData
+  ): Promise<ApiResponse<User>> => {
+    return fetchApi<User>('/auth/wallet/connect', {
+      method: 'POST',
+      body: JSON.stringify({
+        telegram_id: telegramId,
+        wallet,
+      }),
+    });
+  },
+
+  /**
+   * Disconnect a TON wallet from the user
+   * @param telegramId - User's Telegram ID
+   */
+  disconnectWallet: async (
+    telegramId: number
+  ): Promise<ApiResponse<User>> => {
+    return fetchApi<User>('/auth/wallet/disconnect', {
+      method: 'POST',
+      body: JSON.stringify({
+        telegram_id: telegramId,
+      }),
+    });
+  },
 };
 
-export { getApiBaseUrl };
+// ===========================================
+// Wallet Types
+// ===========================================
 
+export interface WalletConnectionData {
+  address: string; // Raw address from TON
+  addressFriendly: string; // User-friendly address
+  chain: number; // -239 for mainnet, -3 for testnet
+  appName?: string; // Wallet app name (e.g., 'Tonkeeper')
+}
+
+export { getApiBaseUrl };

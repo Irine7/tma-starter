@@ -32,6 +32,7 @@ export interface AuthContextValue extends AuthState {
   login: (initData: string) => Promise<boolean>;
   logout: () => void;
   refresh: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 // ===========================================
@@ -134,6 +135,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [login]);
 
   /**
+   * Update user - update user state with new data
+   */
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tma_user', JSON.stringify(updatedUser));
+    }
+    
+    console.log('✅ User updated:', updatedUser.first_name);
+  }, []);
+
+  /**
    * Initial authentication on mount
    */
   useEffect(() => {
@@ -180,7 +194,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initAuth();
   }, [login]);
 
-  // Memoize context value
   const contextValue = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -190,8 +203,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       login,
       logout,
       refresh,
+      updateUser,
     }),
-    [user, isLoading, isAuthenticated, error, login, logout, refresh]
+    [user, isLoading, isAuthenticated, error, login, logout, refresh, updateUser]
   );
 
   return (

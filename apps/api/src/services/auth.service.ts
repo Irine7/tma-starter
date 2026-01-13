@@ -45,6 +45,20 @@ export interface DbUser {
   photo_url: string | null;
   referrer_id: number | null;
   referral_code: string;
+  // Wallet connection fields
+  wallet_address: string | null;
+  wallet_address_friendly: string | null;
+  wallet_connected: boolean;
+  wallet_connected_at: string | null;
+  wallet_chain: number | null;
+  wallet_app_name: string | null;
+}
+
+export interface WalletConnectionData {
+  address: string; // Raw address
+  addressFriendly: string; // User-friendly address
+  chain: number; // -239 for mainnet, -3 for testnet
+  appName?: string; // Wallet app name (e.g., 'Tonkeeper')
 }
 
 // ===========================================
@@ -340,6 +354,13 @@ function getMockDbUser(telegramUser: TelegramUser): DbUser {
     photo_url: telegramUser.photo_url || null,
     referrer_id: null,
     referral_code: `r${telegramUser.id.toString().substring(0, 15)}`,
+    // Wallet fields - default to null/false
+    wallet_address: null,
+    wallet_address_friendly: null,
+    wallet_connected: false,
+    wallet_connected_at: null,
+    wallet_chain: null,
+    wallet_app_name: null,
   };
 }
 
@@ -437,4 +458,136 @@ export async function getReferrals(
     return [];
   }
 }
+
+// ===========================================
+// Wallet Management
+// ===========================================
+
+/**
+ * Connect a wallet to a user
+ * @param telegramId - User's Telegram ID
+ * @param walletData - Wallet connection data
+ * @returns Updated user or null on error
+ */
+export async function connectWallet(
+  telegramId: number,
+  walletData: WalletConnectionData
+): Promise<DbUser | null> {
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️  Supabase not configured, cannot connect wallet');
+    return null;
+  }
+
+  try {
+    // Check if this wallet is already connected to another user
+    const existingWalletUser = await getUserByWalletAddress(walletData.address);
+    
+    if (existingWalletUser && existingWalletUser.telegram_id !== telegramId) {
+      console.error('❌ Wallet already connected to another user');
+      return null;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update({
+        wallet_address: walletData.address,
+        wallet_address_friendly: walletData.addressFriendly,
+        wallet_connected: true,
+        wallet_connected_at: new Date().toISOString(),
+        wallet_chain: walletData.chain,
+        wallet_app_name: walletData.appName || null,
+      })
+      .eq('telegram_id', telegramId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error connecting wallet:', error);
+      return null;
+    }
+
+    console.log(`✅ Wallet connected for user ${telegramId}: ${walletData.addressFriendly}`);
+    return data as DbUser;
+  } catch (error) {
+    console.error('❌ Unexpected error connecting wallet:', error);
+    return null;
+  }
+}
+
+/**
+ * Disconnect a wallet from a user
+ * @param telegramId - User's Telegram ID
+ * @returns Updated user or null on error
+ */
+export async function disconnectWallet(
+  telegramId: number
+): Promise<DbUser | null> {
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️  Supabase not configured, cannot disconnect wallet');
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update({
+        wallet_address: null,
+        wallet_address_friendly: null,
+        wallet_connected: false,
+        wallet_connected_at: null,
+        wallet_chain: null,
+        wallet_app_name: null,
+      })
+      .eq('telegram_id', telegramId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error disconnecting wallet:', error);
+      return null;
+    }
+
+    console.log(`✅ Wallet disconnected for user ${telegramId}`);
+    return data as DbUser;
+  } catch (error) {
+    console.error('❌ Unexpected error disconnecting wallet:', error);
+    return null;
+  }
+}
+
+/**
+ * Get user by wallet address
+ * @param walletAddress - Wallet address (raw format)
+ * @returns User or null if not found
+ */
+export async function getUserByWalletAddress(
+  walletAddress: string
+): Promise<DbUser | null> {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('wallet_address', walletAddress)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        return null;
+      }
+      console.error('❌ Error fetching user by wallet:', error);
+      return null;
+    }
+
+    return data as DbUser;
+  } catch (error) {
+    console.error('❌ Unexpected error fetching user by wallet:', error);
+    return null;
+  }
+}
+
 

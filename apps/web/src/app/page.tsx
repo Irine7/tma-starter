@@ -5,6 +5,7 @@ import { useTelegramUser } from '@/hooks/useTelegramUser';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import type { HealthResponse } from '@tma/shared';
+import { User, Star, Globe, Plug, Check, X, Heart, Rocket } from 'lucide-react';
 
 export default function Home() {
   const { user, isLoading, isMockMode, isInTelegram } = useTelegramUser();
@@ -56,7 +57,7 @@ export default function Home() {
         {/* User Card */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-            <span className="text-2xl">👤</span>
+            <User className="w-6 h-6 text-primary" />
             User Information
           </h2>
           
@@ -76,7 +77,7 @@ export default function Home() {
                   </div>
                 )}
                 {user.is_premium && (
-                  <span className="absolute -top-1 -right-1 text-lg">⭐</span>
+                  <Star className="absolute -top-1 -right-1 w-5 h-5 text-yellow-500 fill-yellow-500" />
                 )}
               </div>
               
@@ -89,12 +90,12 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground">@{user.username}</p>
                 )}
                 <div className="flex gap-2 mt-1 flex-wrap">
-                  <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                  <span className="inline-flex items-center rounded-md bg-primary/15 border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                     ID: {user.id}
                   </span>
                   {user.language_code && (
-                    <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-                      🌐 {user.language_code.toUpperCase()}
+                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/15 border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                      <Globe className="w-3 h-3" /> {user.language_code.toUpperCase()}
                     </span>
                   )}
                 </div>
@@ -108,29 +109,29 @@ export default function Home() {
         {/* Environment Status */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-            <span className="text-2xl">🔌</span>
+            <Plug className="w-6 h-6 text-primary" />
             Environment Status
           </h2>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-secondary/50 p-4">
+            <div className="rounded-xl bg-primary/15 border p-4">
               <p className="text-sm text-muted-foreground">Running in Telegram</p>
               <p className="text-lg font-semibold mt-1">
                 {isInTelegram ? (
-                  <span className="text-green-600 dark:text-green-400">✓ Yes</span>
+                  <span className="text-green-600 dark:text-green-400 flex items-center gap-1"><Check className="w-4 h-4" /> Yes</span>
                 ) : (
-                  <span className="text-amber-600 dark:text-amber-400">✗ No</span>
+                  <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1"><X className="w-4 h-4" /> No</span>
                 )}
               </p>
             </div>
             
-            <div className="rounded-xl bg-secondary/50 p-4">
+            <div className="rounded-xl bg-primary/15 border p-4">
               <p className="text-sm text-muted-foreground">Mock Mode</p>
               <p className="text-lg font-semibold mt-1">
                 {isMockMode ? (
-                  <span className="text-green-600 dark:text-green-400">✓ Active</span>
+                  <span className="text-green-600 dark:text-green-400 flex items-center gap-1"><Check className="w-4 h-4" /> Active</span>
                 ) : (
-                  <span className="text-amber-600 dark:text-amber-400">✗ Disabled</span>
+                  <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1"><X className="w-4 h-4" /> Disabled</span>
                 )}
               </p>
             </div>
@@ -140,7 +141,7 @@ export default function Home() {
         {/* API Health Check */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-            <span className="text-2xl">❤️</span>
+            <Heart className="w-6 h-6 text-red-500 fill-red-500" />
             API Health Check
           </h2>
           
@@ -163,7 +164,7 @@ export default function Home() {
             {healthStatus && !error && (
               <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 text-green-700 dark:text-green-400">
                 <p className="font-medium flex items-center gap-2">
-                  <span className="text-lg">✓</span>
+                  <Check className="w-5 h-5" />
                   API is {healthStatus.status}
                 </p>
                 <div className="mt-2 text-sm space-y-1">
@@ -179,7 +180,7 @@ export default function Home() {
         {/* Quick Links */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-            <span className="text-2xl">🚀</span>
+            <Rocket className="w-6 h-6 text-primary" />
             Quick Start
           </h2>
           
@@ -200,7 +201,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground py-8">
-          <p>TMA Boilerplate • Built with ❤️</p>
+          <p className="flex items-center justify-center gap-1">TMA Boilerplate • Built with <Heart className="w-4 h-4 text-red-500 fill-red-500" /></p>
         </footer>
       </div>
     </main>

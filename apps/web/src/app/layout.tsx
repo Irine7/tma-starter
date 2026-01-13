@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TonConnectProvider } from "@/components/providers/TonConnectProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { DesktopBlocker } from "@/components/DesktopBlocker";
+import { ClosingConfirmation } from "@/components/ClosingConfirmation";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -68,6 +69,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <MockTelegramProvider>
           {/* <DesktopBlocker botUsername="tma_starter_bot" /> */}
+          <ClosingConfirmation />
           <TelegramThemeProvider>
             <TonConnectProvider>
               <AuthProvider>

@@ -174,17 +174,17 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
         <h2 className="text-2xl font-semibold text-foreground mb-2">
           Invite Friends
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Your code:{' '}
-          <code className="bg-secondary px-2 py-1 rounded font-mono text-foreground">
+        {/* <p className="text-sm text-muted-foreground">
+          Your code:
+          <code className="px-2 py-1 rounded font-mono text-foreground">
             {user.referral_code || 'Loading...'}
           </code>
-        </p>
+        </p> */}
       </div>
 
       {/* Stats */}
       <div className="flex justify-center gap-5 mb-5">
-        <div className="flex flex-col items-center px-4 py-4 bg-secondary rounded-lg min-w-[100px]">
+        <div className="flex flex-col items-center px-4 py-4 bg-primary/15 rounded-lg min-w-[100px]">
           <span className="text-[32px] font-bold text-primary">
             {referrals.length}
           </span>
@@ -194,19 +194,57 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
         </div>
       </div>
 
-      {/* Invite Button */}
-      <button 
-        className="w-full py-3.5 bg-primary text-primary-foreground rounded-lg text-base font-semibold transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-        onClick={handleInviteFriend}
-        disabled={!user.referral_code}
-      >
-        {copied ? 'Link Copied!' : 'Invite Friend'}
-      </button>
+      {/* Toast Notification */}
+      {copied && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-card border border-border rounded-full px-6 py-3 shadow-lg">
+            <span className="text-sm font-medium text-foreground">Copied to clipboard</span>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Button with Copy Button */}
+      <div className="flex gap-2">
+        <button 
+          className="flex-1 py-3.5 bg-primary text-primary-foreground rounded-lg text-base font-semibold transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleInviteFriend}
+          disabled={!user.referral_code}
+        >
+          Invite Friend
+        </button>
+        <button 
+          className="px-4 py-3.5 bg-primary/15 border border-border rounded-lg transition-all hover:bg-muted active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => {
+            if (user.referral_code) {
+              const referralUrl = `https://t.me/tma_starter_bot/starter?startapp=${user.referral_code}`;
+              copyToClipboard(referralUrl);
+            }
+          }}
+          disabled={!user.referral_code}
+          title="Copy link"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="text-foreground"
+          >
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+        </button>
+      </div>
 
       {/* Debug button for development */}
       {process.env.NODE_ENV === 'development' && (
         <button 
-          className="w-full py-3 mt-2 bg-secondary text-foreground border-2 border-dashed border-muted-foreground rounded-lg text-sm font-semibold transition-all hover:bg-muted hover:border-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 mt-2 bg-primary/15 text-foreground border rounded-lg text-sm font-semibold transition-all hover:bg-muted hover:border-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleDebugAddReferral}
           disabled={isCreatingDebugReferral || !user.referral_code}
         >
@@ -237,7 +275,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
           {referrals.map((referral) => (
             <div 
               key={referral.telegram_id} 
-              className="flex items-center gap-3 p-3 bg-secondary rounded-lg mb-2"
+              className="bg-card flex items-center gap-3 p-3 bg-primary/15 border rounded-lg mb-2"
             >
               {/* Avatar */}
               <div className="flex-shrink-0">

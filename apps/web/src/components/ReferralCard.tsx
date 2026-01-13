@@ -53,35 +53,30 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
     }
 
     const referralUrl = `https://t.me/tma_starter_bot/starter?startapp=${user.referral_code}`;
+    const shareText = 'Присоединяйся и получи 1000 корон!';
 
     // Check if we're actually running inside Telegram WebApp
     const isInTelegram = typeof window !== 'undefined' && 
                          window.Telegram?.WebApp?.platform && 
                          window.Telegram.WebApp.platform !== 'unknown';
 
-    // Try to use Telegram WebApp API if we're in Telegram
+    // Use Telegram WebApp API to open native share dialog
     if (isInTelegram) {
       try {
-        window.Telegram!.WebApp.openTelegramLink(referralUrl);
+        // Use openTelegramLink with t.me/share/url for native share dialog
+        // This opens the Telegram share UI with chat picker
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent(shareText)}`;
+        window.Telegram!.WebApp.openTelegramLink(shareUrl);
         return;
       } catch (error) {
-        console.warn('Failed to open Telegram link:', error);
+        console.warn('Failed to open Telegram share dialog:', error);
+        // Fallback: copy to clipboard
+        copyToClipboard(referralUrl);
       }
     }
 
-    // Fallback: Open in new window (browser mode)
-    if (typeof window !== 'undefined') {
-      const newWindow = window.open(referralUrl, '_blank', 'noopener,noreferrer');
-      
-      // If popup was blocked, copy to clipboard and notify user
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        copyToClipboard(referralUrl);
-        alert('Please enable popups or use the copied link from your clipboard!');
-      } else {
-        // Also copy to clipboard for convenience
-        copyToClipboard(referralUrl);
-      }
-    }
+    // Fallback for browser mode: copy to clipboard
+    copyToClipboard(referralUrl);
   };
 
   const copyToClipboard = (text: string) => {
@@ -177,7 +172,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
       {/* Header */}
       <div className="text-center mb-5">
         <h2 className="text-2xl font-semibold text-foreground mb-2">
-          🎁 Invite Friends
+          Invite Friends
         </h2>
         <p className="text-sm text-muted-foreground">
           Your code:{' '}
@@ -205,7 +200,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
         onClick={handleInviteFriend}
         disabled={!user.referral_code}
       >
-        {copied ? '✅ Link Copied!' : '📤 Invite Friend'}
+        {copied ? 'Link Copied!' : 'Invite Friend'}
       </button>
 
       {/* Debug button for development */}
@@ -215,7 +210,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
           onClick={handleDebugAddReferral}
           disabled={isCreatingDebugReferral || !user.referral_code}
         >
-          {isCreatingDebugReferral ? '⏳ Creating...' : '🧪 Debug Add Ref'}
+          {isCreatingDebugReferral ? 'Creating...' : 'Debug Add Ref'}
         </button>
       )}
 
@@ -242,21 +237,33 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
           {referrals.map((referral) => (
             <div 
               key={referral.telegram_id} 
-              className="flex justify-between items-center p-3 bg-secondary rounded-lg mb-2"
+              className="flex items-center gap-3 p-3 bg-secondary rounded-lg mb-2"
             >
-              <div className="flex flex-col gap-1">
-                <span className="font-semibold text-foreground">
-                  {referral.first_name}
-                  {referral.last_name ? ` ${referral.last_name}` : ''}
-                </span>
-                {referral.username && (
-                  <span className="text-sm text-muted-foreground">
-                    @{referral.username}
-                  </span>
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {referral.photo_url ? (
+                  <img 
+                    src={referral.photo_url} 
+                    alt={referral.first_name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
+                    {referral.first_name.charAt(0).toUpperCase()}
+                  </div>
                 )}
               </div>
-              <div className="text-xs text-muted-foreground">
-                {new Date(referral.created_at).toLocaleDateString()}
+              
+              {/* Username/Name */}
+              <div className="flex-1 min-w-0">
+                <span className="font-semibold text-foreground block truncate">
+                  {referral.username ? `@${referral.username}` : referral.first_name}
+                </span>
+                {referral.username && (
+                  <span className="text-sm text-muted-foreground truncate block">
+                    {referral.first_name}{referral.last_name ? ` ${referral.last_name}` : ''}
+                  </span>
+                )}
               </div>
             </div>
           ))}

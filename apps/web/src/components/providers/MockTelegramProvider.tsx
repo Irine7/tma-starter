@@ -82,6 +82,16 @@ export function MockTelegramProvider({ children }: MockTelegramProviderProps) {
       // Signal to Telegram that the app is ready
       webApp.ready();
       webApp.expand();
+      
+      // Request fullscreen mode on mobile platforms only
+      // This makes the app background extend behind the notch/status bar area
+      const mobilePlatforms = ['android', 'ios'];
+      const platform = webApp.platform?.toLowerCase() || '';
+      const isMobile = mobilePlatforms.some(p => platform.includes(p));
+      
+      if (isMobile && webApp.requestFullscreen) {
+        webApp.requestFullscreen();
+      }
     } else {
       // Development mode - use mock data
       console.log('🔧 [TMA] Running in development mode with mock Telegram data');

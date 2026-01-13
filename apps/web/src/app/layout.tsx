@@ -6,6 +6,7 @@ import { TelegramThemeProvider } from "@/components/providers/TelegramThemeProvi
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TonConnectProvider } from "@/components/providers/TonConnectProvider";
 import { BottomNav } from "@/components/BottomNav";
+import { DesktopBlocker } from "@/components/DesktopBlocker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,9 +47,27 @@ export default function RootLayout({
           src="https://telegram.org/js/telegram-web-app.js"
           async
         />
+        {/* Prevent flash of light/pink theme by applying theme before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('theme-preference');
+                  var isDark = stored === 'dark' ||
+                    (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <MockTelegramProvider>
+          {/* <DesktopBlocker botUsername="tma_starter_bot" /> */}
           <TelegramThemeProvider>
             <TonConnectProvider>
               <AuthProvider>

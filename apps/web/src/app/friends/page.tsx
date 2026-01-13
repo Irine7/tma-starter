@@ -5,7 +5,7 @@ import { ReferralCard } from '@/components/ReferralCard';
 export default function FriendsPage() {
   return (
     <main className="min-h-screen bg-background pb-20">
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="mx-auto max-w-2xl px-6 pt-24 pb-12">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">Friends</h1>

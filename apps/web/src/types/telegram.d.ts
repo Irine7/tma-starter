@@ -92,8 +92,21 @@ interface TelegramWebApp {
   colorScheme: 'light' | 'dark';
   themeParams: TelegramThemeParams;
   isExpanded: boolean;
+  isFullscreen: boolean;
   viewportHeight: number;
   viewportStableHeight: number;
+  safeAreaInset: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  contentSafeAreaInset: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
   headerColor: string;
   backgroundColor: string;
   isClosingConfirmationEnabled: boolean;
@@ -133,6 +146,8 @@ interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   close: () => void;
+  requestFullscreen: () => void;
+  exitFullscreen: () => void;
 }
 
 interface Telegram {

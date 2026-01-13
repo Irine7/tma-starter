@@ -39,8 +39,8 @@ export default function Home() {
     <main className="min-h-screen bg-background pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-primary/20" />
-        <div className="relative px-6 pt-22 pb-2 sm:py-24">
+        <div className="absolute inset-0 bg-background" />
+        <div className="relative px-6 pt-24 pb-2 sm:py-24">
           <div className="mx-auto max-w-2xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               TMA Boilerplate

@@ -6,7 +6,7 @@ import { Palette, User, Bell, Shield, } from 'lucide-react';
 export default function SettingsPage() {
   return (
     <main className="min-h-screen bg-background pb-20">
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="mx-auto max-w-2xl px-6 pt-24 pb-12">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground 

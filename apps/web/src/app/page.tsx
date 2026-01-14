@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import type { HealthResponse } from '@tma/shared';
 import { User, Star, Globe, Plug, Check, X, Heart, Rocket } from 'lucide-react';
+import { HapticFeedback } from '@/components/HapticFeedback';
 
 export default function Home() {
   const { user, isLoading, isMockMode, isInTelegram } = useTelegramUser();
@@ -176,6 +177,9 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Haptic Feedback Demo */}
+        <HapticFeedback />
 
         {/* Quick Links */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">

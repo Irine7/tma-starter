@@ -184,7 +184,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
 
       {/* Stats */}
       <div className="flex justify-center gap-5 mb-5">
-        <div className="flex flex-col items-center px-4 py-4 bg-primary/15 rounded-lg min-w-[100px]">
+        <div className="flex flex-col items-center px-4 py-4 border rounded-lg min-w-[100px]">
           <span className="text-[32px] font-bold text-primary">
             {referrals.length}
           </span>
@@ -213,7 +213,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
           Invite Friend
         </button>
         <button 
-          className="px-4 py-3.5 bg-primary/15 border border-border rounded-lg transition-all hover:bg-muted active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-3.5 border border-border rounded-lg transition-all hover:bg-muted active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => {
             if (user.referral_code) {
               const referralUrl = `https://t.me/tma_starter_bot/starter?startapp=${user.referral_code}`;
@@ -244,7 +244,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
       {/* Debug button for development */}
       {process.env.NODE_ENV === 'development' && (
         <button 
-          className="w-full py-3 mt-2 bg-primary/15 text-foreground border rounded-lg text-sm font-semibold transition-all hover:bg-muted hover:border-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 mt-2 border text-foreground border rounded-lg text-sm font-semibold transition-all hover:bg-muted hover:border-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleDebugAddReferral}
           disabled={isCreatingDebugReferral || !user.referral_code}
         >
@@ -275,7 +275,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
           {referrals.map((referral) => (
             <div 
               key={referral.telegram_id} 
-              className="bg-card flex items-center gap-3 p-3 bg-primary/15 border rounded-lg mb-2"
+              className="bg-card flex items-center gap-3 p-3 border rounded-lg mb-2"
             >
               {/* Avatar */}
               <div className="flex-shrink-0">

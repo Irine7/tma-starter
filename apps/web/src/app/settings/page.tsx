@@ -77,11 +77,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="text-center text-sm text-muted-foreground py-8">
-          <p>TMA Boilerplate v1.0.0</p>
-        </footer>
       </div>
     </main>
   );

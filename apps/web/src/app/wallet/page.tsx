@@ -107,8 +107,8 @@ export default function WalletPage() {
         <div className="flex flex-col items-center justify-center p-8 bg-card rounded-xl border border-border shadow-sm">
           {(wallet || user?.wallet_connected) ? (
             <>
-              <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6 ring-1 ring-green-500/20">
-                <Check className="w-10 h-10 text-green-500" />
+              <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6 ring-1 ring-green-500/20">
+                <Check className="w-10 h-10 text-white" />
               </div>
               
               <h3 className="text-2xl font-bold mb-2">Wallet Connected</h3>
@@ -135,7 +135,7 @@ export default function WalletPage() {
               </div>
 
               {!wallet && (
-                <div className="mb-6 p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm rounded-lg text-center max-w-xs">
+                <div className="mb-6 p-3 border text-black dark:text-white text-sm rounded-lg text-center max-w-xs">
                   Session disconnected locally. <br/>Reconnect to sign transactions.
                 </div>
               )}

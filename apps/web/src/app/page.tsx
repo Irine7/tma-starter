@@ -54,7 +54,7 @@ export default function Home() {
       </div>
 
       {/* Content */}
-      <div className="mx-auto max-w-2xl px-6 py-12 space-y-8">
+      <div className="mx-auto max-w-2xl px-6 pb-12 space-y-8">
         {/* User Card */}
         <section className="rounded-2xl border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
@@ -91,11 +91,11 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground">@{user.username}</p>
                 )}
                 <div className="flex gap-2 mt-1 flex-wrap">
-                  <span className="inline-flex items-center rounded-md bg-primary/15 border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                  <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                     ID: {user.id}
                   </span>
                   {user.language_code && (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/15 border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                       <Globe className="w-3 h-3" /> {user.language_code.toUpperCase()}
                     </span>
                   )}
@@ -115,7 +115,7 @@ export default function Home() {
           </h2>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-primary/15 border p-4">
+            <div className="rounded-xl border p-4">
               <p className="text-sm text-muted-foreground">Running in Telegram</p>
               <p className="text-lg font-semibold mt-1">
                 {isInTelegram ? (
@@ -126,7 +126,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="rounded-xl bg-primary/15 border p-4">
+            <div className="rounded-xl border p-4">
               <p className="text-sm text-muted-foreground">Mock Mode</p>
               <p className="text-lg font-semibold mt-1">
                 {isMockMode ? (
@@ -202,11 +202,6 @@ export default function Home() {
             </ul>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="text-center text-sm text-muted-foreground py-8">
-          <p className="flex items-center justify-center gap-1">TMA Boilerplate • Built with <Heart className="w-4 h-4 text-red-500 fill-red-500" /></p>
-        </footer>
       </div>
     </main>
   );

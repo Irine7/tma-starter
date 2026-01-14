@@ -24,7 +24,7 @@ export function ThemeSettings() {
   ] as const;
 
   return (
-    <div className="flex w-fit items-center rounded-full bg-secondary/50 p-1 ring-1 ring-border">
+    <div className="flex w-fit items-center rounded-full border p-0.5 ring-1 ring-border">
       {themes.map((theme) => {
         const Icon = theme.icon;
         const isActive = currentTheme === theme.value;

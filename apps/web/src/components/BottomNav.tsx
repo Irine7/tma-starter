@@ -18,12 +18,6 @@ const navItems: NavItem[] = [
     path: '/',
   },
   {
-    id: 'ratings',
-    label: 'Ratings',
-    icon: Trophy,
-    path: '/ratings',
-  },
-  {
     id: 'friends',
     label: 'Friends',
     icon: Users,

@@ -1,4 +1,4 @@
-# TMA Boilerplate
+# TMA Starter
 
 **Production-ready Telegram Mini App Boilerplate**
 
@@ -21,7 +21,7 @@ A modern, type-safe monorepo starter template for building Telegram Mini Apps wi
 ## 📁 Project Structure
 
 ```
-tma-boilerplate/
+tma-starter/
 ├── apps/
 │   ├── web/          # Next.js 16 frontend
 │   └── api/          # Express backend
@@ -43,8 +43,8 @@ tma-boilerplate/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/tma-boilerplate.git
-cd tma-boilerplate
+git clone https://github.com/Irine7/tma-starter.git
+cd tma-starter
 
 # Install dependencies
 pnpm install

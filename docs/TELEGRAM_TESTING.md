@@ -1,16 +1,16 @@
-# Настройка для Тестирования в Telegram
+# Telegram Testing Setup
 
-## Обзор
+## Overview
 
-Проект теперь автоматически определяет правильный API URL в зависимости от окружения:
-- **В браузере (Mock Mode)**: используется `http://localhost:3001`
-- **В Telegram Mini App**: используется ngrok URL из `NEXT_PUBLIC_API_URL`
+The project automatically detects the correct API URL depending on the environment:
+- **In Browser (Mock Mode)**: uses `http://localhost:3001`
+- **In Telegram Mini App**: uses ngrok URL from `NEXT_PUBLIC_API_URL`
 
-## Переменные Окружения
+## Environment Variables
 
-### 1. `.env` (корневой файл)
+### 1. `.env` (root file)
 
-Используется для настройки API сервера:
+Used for configuring the API server:
 
 ```env
 # API Configuration
@@ -18,8 +18,8 @@ NODE_ENV=development
 API_PORT=3001
 BOT_TOKEN=your_telegram_bot_token_here
 
-# CORS - в режиме разработки можно оставить пустым
-# Система автоматически пропустит localhost и ngrok
+# CORS - can be left empty in development
+# System automatically allows localhost and ngrok
 ALLOWED_ORIGINS=
 
 # Supabase Configuration
@@ -30,144 +30,144 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 ### 2. `apps/web/.env.local`
 
-Используется ТОЛЬКО для тестирования в Telegram с ngrok:
+Used ONLY for testing in Telegram with ngrok:
 
 ```env
-# API URL для Telegram Mini App (ngrok)
+# API URL for Telegram Mini App (ngrok)
 NEXT_PUBLIC_API_URL=https://your-api-ngrok-url.ngrok-free.app
 ```
 
-> ⚠️ **Важно**: 
-> - Этот файл используется только когда приложение запущено в Telegram
-> - В браузере (mock mode) всегда используется `localhost:3001`
-> - Можно **удалить** этот файл для локальной разработки в браузере
+> ⚠️ **Important**: 
+> - This file is used only when the app is running in Telegram
+> - In browser (mock mode) `localhost:3001` is always used
+> - You can **delete** this file for local development in the browser
 
-## Шаги для Тестирования
+## Testing Steps
 
-### Режим 1: Разработка в Браузере (Mock Mode)
+### Mode 1: Browser Development (Mock Mode)
 
 ```bash
-# 1. Удалите .env.local если он существует (опционально)
+# 1. Delete .env.local if it exists (optional)
 rm apps/web/.env.local
 
-# 2. Запустите dev сервер
+# 2. Start dev server
 pnpm dev
 
-# 3. Откройте в браузере
+# 3. Open in browser
 # → http://localhost:3000
 ```
 
-В этом режиме:
-- ✅ Используются моковые данные пользователя
-- ✅ API запросы идут на `localhost:3001`
-- ✅ Не нужен ngrok
-- ✅ Не нужен Telegram
+In this mode:
+- ✅ User mock data is used
+- ✅ API requests go to `localhost:3001`
+- ✅ No ngrok needed
+- ✅ No Telegram needed
 
 ---
 
-### Режим 2: Тестирование в Telegram
+### Mode 2: Telegram Testing
 
 ```bash
-# 1. Запустите dev сервер
+# 1. Start dev server
 pnpm dev
 
-# 2. В отдельном терминале запустите ngrok
+# 2. In a separate terminal run ngrok
 pnpm tunnel
 
-# 3. Скопируйте ngrok URLs из вывода:
-# Пример:
+# 3. Copy ngrok URLs from output:
+# Example:
 # Web: https://abc123.ngrok-free.app
 # API: https://xyz789.ngrok-free.app
 
-# 4. Создайте apps/web/.env.local с API URL
+# 4. Create apps/web/.env.local with API URL
 echo 'NEXT_PUBLIC_API_URL=https://xyz789.ngrok-free.app' > apps/web/.env.local
 
-# 5. Перезапустите dev сервер (ВАЖНО!)
-# Ctrl+C в терминале с pnpm dev, затем:
+# 5. Restart dev server (IMPORTANT!)
+# Ctrl+C in terminal with pnpm dev, then:
 pnpm dev
 
-# 6. Настройте Mini App в BotFather
+# 6. Configure Mini App in BotFather
 # /newapp
-# Введите Web URL: https://abc123.ngrok-free.app
+# Enter Web URL: https://abc123.ngrok-free.app
 
-# 7. Откройте Mini App в Telegram
+# 7. Open Mini App in Telegram
 ```
 
-В этом режиме:
-- ✅ Используются реальные данные Telegram пользователя
-- ✅ API запросы идут на ngrok URL
-- ✅ CORS автоматически настроен
-- ✅ Валидация `initData` работает
+In this mode:
+- ✅ Real Telegram user data is used
+- ✅ API requests go to ngrok URL
+- ✅ CORS is automatically configured
+- ✅ `initData` validation works
 
 ---
 
-## Проверка Текущей Конфигурации
+## Verifying Current Configuration
 
-### Проверить API URL в браузере
+### Check API URL in Browser
 
-Откройте консоль браузера (F12) и выполните:
+Open browser console (F12) and run:
 
 ```javascript
-// Проверить текущий API URL
+// Check current API URL
 console.log(window.Telegram?.WebApp?.initData ? 'Telegram Mode' : 'Browser Mode');
 
-// Проверить переменную окружения
+// Check environment variable
 console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
 ```
 
-### Проверить что API работает
+### Check if API works
 
 ```bash
-# Проверить локальный API
+# Check local API
 curl http://localhost:3001/health
 
-# Проверить ngrok API
+# Check ngrok API
 curl https://xyz789.ngrok-free.app/health
 ```
 
 ---
 
-## Частые Проблемы
+## Common Issues
 
-### "Failed to connect to server" в браузере
+### "Failed to connect to server" in Browser
 
-**Решение**: Удалите `apps/web/.env.local` и перезапустите dev сервер:
+**Solution**: Delete `apps/web/.env.local` and restart dev server:
 ```bash
 rm apps/web/.env.local
 pnpm dev
 ```
 
-### "Failed to connect to server" в Telegram
+### "Failed to connect to server" in Telegram
 
-**Причины**:
-1. Не перезапустили dev сервер после создания `.env.local`
-2. Неправильный ngrok URL в `.env.local`
-3. Ngrok не запущен
+**Causes**:
+1. Forgot to restart dev server after creating `.env.local`
+2. Incorrect ngrok URL in `.env.local`
+3. Ngrok is not running
 
-**Решение**:
+**Solution**:
 ```bash
-# 1. Убедитесь что ngrok запущен
+# 1. Ensure ngrok is running
 pnpm tunnel
 
-# 2. Получите правильный API URL
+# 2. Get correct API URL
 curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"https://[^"]*' | grep '3001'
 
-# 3. Обновите .env.local с правильным URL
-echo 'NEXT_PUBLIC_API_URL=<полученный_url>' > apps/web/.env.local
+# 3. Update .env.local with correct URL
+echo 'NEXT_PUBLIC_API_URL=<obtained_url>' > apps/web/.env.local
 
-# 4. ОБЯЗАТЕЛЬНО перезапустите dev сервер
+# 4. DEFINITELY restart dev server
 pnpm dev
 ```
 
-### Ngrok URL меняется при каждом запуске
+### Ngrok URL changes on every restart
 
-**Решение**: Получите платный аккаунт ngrok для постоянных URL, или используйте локальный домен с SSL.
+**Solution**: Get a paid ngrok account for persistent URLs, or use a local domain with SSL.
 
 ---
 
-## Архитектура Решения
+## Solution Architecture
 
-### Динамическое Определение API URL
+### Dynamic API URL Detection
 
 ```typescript
 // apps/web/src/lib/api.ts
@@ -187,12 +187,12 @@ function getApiBaseUrl(): string {
 }
 ```
 
-### CORS Настройка
+### CORS Configuration
 
 ```typescript
 // apps/api/src/middleware/cors.ts
 
-// В режиме разработки автоматически разрешает:
+// In development mode automatically allows:
 // - localhost:*
 // - *.ngrok-free.app
 // - *.ngrok.io
@@ -200,13 +200,13 @@ function getApiBaseUrl(): string {
 
 ---
 
-## Резюме
+## Summary
 
-| Режим | API URL | Нужен .env.local? | Нужен ngrok? |
+| Mode | API URL | Needs .env.local? | Needs ngrok? |
 |-------|---------|-------------------|--------------|
-| **Браузер (Mock)** | `localhost:3001` | ❌ Нет | ❌ Нет |
-| **Telegram** | ngrok URL | ✅ Да | ✅ Да |
+| **Browser (Mock)** | `localhost:3001` | ❌ No | ❌ No |
+| **Telegram** | ngrok URL | ✅ Yes | ✅ Yes |
 
-**Главное правило**: 
-- Для локальной разработки в браузере - **не создавайте** `.env.local`
-- Для тестирования в Telegram - **создайте** `.env.local` с ngrok URL
+**Main Rule**: 
+- For local browser development - **do not create** `.env.local`
+- For Telegram testing - **create** `.env.local` with ngrok URL

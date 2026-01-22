@@ -8,6 +8,7 @@ import { TonConnectProvider } from "@/components/providers/TonConnectProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { DesktopBlocker } from "@/components/DesktopBlocker";
 import { ClosingConfirmation } from "@/components/ClosingConfirmation";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -75,6 +76,11 @@ export default function RootLayout({
               <AuthProvider>
                 {children}
                 <BottomNav />
+                <Toaster 
+                  position="top-center" 
+                  offset="96px"
+                  mobileOffset="96px"
+                />
               </AuthProvider>
             </TonConnectProvider>
           </TelegramThemeProvider>

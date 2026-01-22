@@ -22,7 +22,12 @@ export function TonConnectProvider({ children }: TonConnectProviderProps) {
     : '';
 
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
+    <TonConnectUIProvider 
+      manifestUrl={manifestUrl}
+      actionsConfiguration={{
+        twaReturnUrl: 'tg://resolve?domain=tma_starter_bot'
+      }}
+    >
       {children}
     </TonConnectUIProvider>
   );

@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import type { HealthResponse } from '@tma/shared';
 import { User, Star, Globe, Plug, Check, X, Heart, Rocket } from 'lucide-react';
 import { HapticFeedback } from '@/components/HapticFeedback';
+import { DeveloperDonation } from '@/components/features/donation/DeveloperDonation';
 
 export default function Home() {
   const { user, isLoading, isMockMode, isInTelegram } = useTelegramUser();
@@ -41,7 +42,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-background" />
-        <div className="relative px-6 pt-24 pb-2 sm:py-24">
+        <div className="relative px-6 pt-24">
           <div className="mx-auto max-w-2xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               TMA Boilerplate
@@ -52,6 +53,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+			 {/* Developer Donation */}
+        <DeveloperDonation />
 
       {/* Content */}
       <div className="mx-auto max-w-2xl px-6 pb-12 space-y-8">

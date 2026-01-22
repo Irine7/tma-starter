@@ -54,7 +54,7 @@ export function HapticFeedback() {
       </h2>
 
       {!isInTelegram && (
-        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-amber-700 dark:text-amber-400 text-sm mb-4">
+        <div className="rounded-xl bg-card border p-4 text-muted-foreground text-sm mb-4">
           <p className="font-medium flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
             Haptic Feedback is available only in Telegram

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { TonConnectButton, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
+import { Address } from '@ton/core';
 import { useAuth } from '@/contexts/AuthContext';
 import { api, WalletConnectionData } from '@/lib/api';
 import { Check } from 'lucide-react';
@@ -10,18 +11,28 @@ export default function WalletPage() {
   const wallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
   const { user, updateUser } = useAuth();
+  
+  // Use a ref for user to avoid effect re-execution loops that cause crashes
+  const userRef = useRef(user);
+  
+  // Update ref when user changes
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   /**
    * Sync wallet connection state with database
    */
   const syncWalletToDatabase = useCallback(async (walletData: WalletConnectionData) => {
-    if (!user) {
+    const currentUser = userRef.current;
+    
+    if (!currentUser) {
       console.log('⚠️ No user, skipping wallet sync');
       return;
     }
 
     try {
-      const response = await api.connectWallet(user.telegram_id, walletData);
+      const response = await api.connectWallet(currentUser.telegram_id, walletData);
       
       if (response.success && response.data) {
         updateUser(response.data);
@@ -32,16 +43,17 @@ export default function WalletPage() {
     } catch (error) {
       console.error('❌ Error syncing wallet:', error);
     }
-  }, [user, updateUser]);
+  }, [updateUser]);
 
   /**
    * Handle wallet disconnection
    */
   const handleDisconnect = useCallback(async () => {
-    if (!user) return;
+    const currentUser = userRef.current;
+    if (!currentUser) return;
 
     try {
-      const response = await api.disconnectWallet(user.telegram_id);
+      const response = await api.disconnectWallet(currentUser.telegram_id);
       
       if (response.success && response.data) {
         updateUser(response.data);
@@ -52,7 +64,34 @@ export default function WalletPage() {
     } catch (error) {
       console.error('❌ Error disconnecting wallet:', error);
     }
-  }, [user, updateUser]);
+  }, [updateUser]);
+
+  /**
+   * Helper to get chain ID as number (TonConnect may return string)
+   */
+  const getChainId = (chain: string | number): number => {
+    if (typeof chain === 'number') return chain;
+    const parsed = parseInt(chain, 10);
+    return isNaN(parsed) ? -239 : parsed;
+  };
+
+  /**
+   * Helper to format address
+   */
+  const formatAddress = (rawAddress: string, chain: number): string => {
+    try {
+      // chain: -239 = Mainnet, -3 = Testnet
+      const isTestnet = chain === -3;
+      return Address.parse(rawAddress).toString({
+        urlSafe: true,
+        bounceable: false,
+        testOnly: isTestnet
+      });
+    } catch (e) {
+      console.error('Error formatting address:', e);
+      return rawAddress;
+    }
+  };
 
   /**
    * Listen for wallet connection/disconnection events
@@ -63,10 +102,11 @@ export default function WalletPage() {
     const unsubscribe = tonConnectUI.onStatusChange((walletInfo) => {
       if (walletInfo) {
         // Wallet connected
+        const chainId = getChainId(walletInfo.account.chain);
         const walletData: WalletConnectionData = {
           address: walletInfo.account.address,
-          addressFriendly: walletInfo.account.address, // TonConnect returns user-friendly by default
-          chain: typeof walletInfo.account.chain === 'number' ? walletInfo.account.chain : -239,
+          addressFriendly: formatAddress(walletInfo.account.address, chainId),
+          chain: chainId,
           appName: walletInfo.device?.appName,
         };
         
@@ -86,17 +126,23 @@ export default function WalletPage() {
    * Sync on initial load if wallet is already connected
    */
   useEffect(() => {
-    if (wallet && user && !user.wallet_connected) {
+    // We only want to run this once on mount/wallet init, basically check consistency
+    // But be careful not to trigger infinite loops.
+    // userRef check is safer.
+    const currentUser = userRef.current;
+    
+    if (wallet && currentUser && !currentUser.wallet_connected) {
+      const chainId = getChainId(wallet.account.chain);
       const walletData: WalletConnectionData = {
         address: wallet.account.address,
-        addressFriendly: wallet.account.address,
-        chain: typeof wallet.account.chain === 'number' ? wallet.account.chain : -239,
+        addressFriendly: formatAddress(wallet.account.address, chainId),
+        chain: chainId,
         appName: wallet.device?.appName,
       };
       
       syncWalletToDatabase(walletData);
     }
-  }, [wallet, user, syncWalletToDatabase]);
+  }, [wallet, syncWalletToDatabase]); // user removed from dep to avoid re-trigger loop
 
   return (
     <main className="min-h-screen bg-background pb-20">
@@ -122,8 +168,13 @@ export default function WalletPage() {
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="font-mono text-sm">
                     {(() => {
-                      const addr = wallet?.account.address || user?.wallet_address_friendly || user?.wallet_address;
+                      const addr = user?.wallet_address_friendly || wallet?.account.address || user?.wallet_address;
                       if (!addr) return 'Unknown Address';
+                      // If it looks like a raw address (contains :), try to format it for display
+                      if (addr.includes(':') && wallet?.account.chain) {
+                         const chainId = getChainId(wallet.account.chain);
+                         return formatAddress(addr, chainId);
+                      }
                       return `${addr.slice(0, 6)}...${addr.slice(-6)}`;
                     })()}
                   </span>

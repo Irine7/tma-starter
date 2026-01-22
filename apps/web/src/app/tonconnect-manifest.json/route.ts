@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  // Use header lookup to ensure we get the forwarded ngrok host, not localhost
+  // Use header lookup to ensure we get the forwarded host
+  const forwardedHost = request.headers.get('x-forwarded-host');
   const hostHeader = request.headers.get('host');
   const proto = request.headers.get('x-forwarded-proto') || 'https';
   
-  // Fallback to request.url origin if headers are missing (unlikely in ngrok)
-  const fallbackOrigin = new URL(request.url).origin;
-  const host = hostHeader ? `${proto}://${hostHeader}` : fallbackOrigin;
+  // Prefer forwarded host (common in tunnels/proxies), then host header, then fallback
+  const effectiveHost = forwardedHost || hostHeader || new URL(request.url).host;
+  
+  // Force HTTPS unless strictly localhost
+  const protocol = effectiveHost.includes('localhost') ? 'http' : 'https';
+  const host = `${protocol}://${effectiveHost}`;
 
   const manifest = {
     url: host,

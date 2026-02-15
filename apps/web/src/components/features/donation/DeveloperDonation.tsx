@@ -117,7 +117,7 @@ export function DeveloperDonation() {
           
           <Button
             onClick={() => setIsOpen(true)}
-            className="w-full bg-gradient-to-r from-primary to-ring hover:from-primary/80 hover:to-ring/80 text-white shadow-lg shadow-primary/20"
+            className="w-full"
           >
             <Gift className="w-5 h-5 mr-2" />
             Make a Donation

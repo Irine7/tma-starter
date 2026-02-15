@@ -1,20 +1,22 @@
 # TMA Starter
 
-**Production-ready Telegram Mini App Boilerplate**
+**The Ultimate Telegram Mini App Boilerplate**
 
-A modern, type-safe monorepo starter template for building Telegram Mini Apps with Next.js 16 and Express.
+A production-ready, high-performance monorepo starter kit for building modern Telegram Mini Apps. Built with **Next.js 16**, **Express**, **Supabase**, and **TON Connect**.
+
+> ✨ **Perfect for:** Developers who want to skip the setup pain and start building features immediately.
 
 ---
 
 ## ✨ Features
 
-- **🚀 Next.js 16** — Latest App Router with Turbopack
-- **⚡ Express API** — TypeScript backend with middleware
-- **📦 pnpm Workspaces** — Efficient monorepo management
-- **🎨 Tailwind CSS + shadcn/ui** — Beautiful, accessible components
-- **🔒 Type Safety** — Shared types between frontend and backend
-- **🔧 Mock Environment** — Develop in browser without deploying to Telegram
-- **📱 Telegram WebApp API** — Full TypeScript definitions included
+- **� Modern Stack** — Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui.
+- **👛 TON Wallet Integration** — Native `@tonconnect/ui-react` support with ready-to-use connect button and format utilities.
+- **� Built-in Donation System** — Production-ready donation component handling Testnet/Mainnet automatically.
+- **🔌 Backend Ready** — Express API with Supabase integration (Auth, Database, Realtime).
+- **�️ Type-Safe Monorepo** — Shared types between Frontend and Backend using pnpm workspaces.
+- **⚡ Super Fast Development** — **Mock Environment** lets you build in the browser without deploying to Telegram every time.
+- **🌐 Tunneling Made Easy** — One-command tunneling with Cloudflare or Ngrok for real-device testing.
 
 ---
 
@@ -23,11 +25,13 @@ A modern, type-safe monorepo starter template for building Telegram Mini Apps wi
 ```
 tma-starter/
 ├── apps/
-│   ├── web/          # Next.js 16 frontend
-│   └── api/          # Express backend
+│   ├── web/          # Next.js 16 frontend (UI, Wallet, Components)
+│   └── api/          # Express backend (Auth, Supabase, Validation)
 ├── packages/
-│   └── shared/       # Shared types & utilities
-└── package.json      # Root workspace config
+│   └── shared/       # Shared TypeScript interfaces & utilities
+├── supabase/         # Migrations & database config
+├── .env.example      # Template for environment variables
+└── package.json      # Workspace configuration
 ```
 
 ---
@@ -35,11 +39,11 @@ tma-starter/
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js 18+
-- pnpm 8+
+- pnpm 9+
+- Git
 
-### Installation
+### 1. Installation
 
 ```bash
 # Clone the repository
@@ -49,61 +53,41 @@ cd tma-starter
 # Install dependencies
 pnpm install
 
-# Copy environment files
-cp apps/api/.env.example apps/api/.env
+# Setup Environment
+cp .env.example .env
 ```
 
-### Development
+### 2. Configure Environment (`.env`)
+Fill in your keys in the created `.env` file:
+- `BOT_TOKEN` from @BotFather
+- `SUPABASE_URL` & `KEYS` from Supabase
+
+### 3. Start Development
 
 ```bash
 # Start both frontend and backend
 pnpm dev
-
-# Or start individually
-pnpm dev:web   # Next.js on http://localhost:3000
-pnpm dev:api   # Express on http://localhost:3001
 ```
-
-### Open in Browser
-
-Navigate to [http://localhost:3000](http://localhost:3000). You'll see the app running in **Mock Mode** with fake Telegram user data.
+Open [http://localhost:3000](http://localhost:3000) to see the **Mock Mode** in action.
 
 ---
 
-## 🤖 Telegram Bot Configuration
+## 📱 Running in Telegram
 
-Follow these steps to set up your bot and enable the "Menu" button (or "Play" button) to launch your Mini App directly from the chat.
+To test on a real device, you need a secure tunnel (HTTPS).
 
-### 1. Create a Bot with BotFather
-1. Open [BotFather](https://t.me/BotFather) in Telegram.
-2. Send `/newbot` and follow the prompts.
-3. Copy the **API Token** and paste it into `apps/api/.env` as `BOT_TOKEN`.
+### Method 1: Cloudflare Tunnel (Recommended 🚀)
+Cloudflare allows smooth wallet connection without "Visit Site" blockers.
 
-### 2. Set up Tunneling (Choose One)
+```bash
+pnpm tunnel:cf
+```
+Copy the URL (e.g., `https://...trycloudflare.com`) and send it to @BotFather as your **Web App URL**.
 
-#### Option 1: Cloudflare Tunnel (Recommended 🚀)
-Cloudflare Tunnel is preferred because it avoids the "Visit Site" interstitial page that often breaks the **Telegram Wallet**.
-
-1. **Install Cloudflare**:
-   ```bash
-   brew install cloudflared  # macOS
-   # For Windows/Linux, see Cloudflare docs
-   ```
-2. **Run Tunnel**:
-   ```bash
-   pnpm tunnel:cf
-   ```
-3. Copy the URL ending in `.trycloudflare.com`.
-
-#### Option 2: Ngrok (Standard)
-> [!WARNING]
-> Ngrok's free plan shows a "Visit Site" warning page. This breaks the **Telegram Wallet** connection because the wallet cannot verify your manifest file. Use this only if you don't need wallet features or have a paid Ngrok plan.
-
-1. **Install Ngrok** from [ngrok.com](https://ngrok.com).
-2. **Run Tunnel**:
-   ```bash
-   pnpm tunnel:web
-   ```
+### Method 2: Ngrok
+```bash
+pnpm tunnel:web
+```
 3. Copy the URL ending in `.ngrok-free.app`.
 
 ### 3. Connect Web App to Bot
@@ -177,82 +161,35 @@ import type { TelegramUser, ApiResponse, HealthResponse } from '@tma/shared';
 
 ---
 
-## 🎨 UI Components
+## �️ Tech Stack Details
 
-The frontend uses [shadcn/ui](https://ui.shadcn.com/) with the New York style:
-
-```bash
-# Add more components
-cd apps/web
-pnpm dlx shadcn@latest add [component-name]
-```
-
-Available components are configured in `apps/web/components.json`.
-
----
-
-## 📡 API Endpoints
-
-### Health Check
-
-```
-GET /health
-GET /health/ready
-GET /health/live
-```
-
-### Adding New Routes
-
-1. Create a route file in `apps/api/src/routes/`
-2. Import and use in `apps/api/src/index.ts`
-3. Add Telegram validation middleware as needed
+| Package | Version | Description |
+|---------|---------|-------------|
+| **Next.js** | 16.1 | Frontend Framework |
+| **React** | 19 | UI Library |
+| **Express** | 4.x | Backend API |
+| **Supabase** | Latest | Database & Auth |
+| **TON Connect** | 2.x | Wallet Integration |
+| **Tailwind** | 4.0 | Styling |
+| **Framer Motion**| Latest | Animations |
 
 ---
 
-## 🛠️ Scripts
-
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all apps in development mode |
-| `pnpm dev:web` | Start only the frontend |
-| `pnpm dev:api` | Start only the backend |
-| `pnpm build` | Build all apps for production |
-| `pnpm lint` | Run linting across all apps |
-| `pnpm clean` | Remove all node_modules |
-
----
-
-## 🌍 Environment Variables
-
-### API (`apps/api/.env`)
-
-```env
-PORT=3001
-BOT_TOKEN=your_telegram_bot_token_here
-ALLOWED_ORIGINS=http://localhost:3000
-```
-
-### Web (`apps/web/.env.local`)
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
-
----
-
-## 📚 Resources
+## 📚 Documentation
 
 - [Telegram Mini Apps Documentation](https://core.telegram.org/bots/webapps)
+- [TON Connect 2.0 Docs](https://docs.ton.org/develop/dapps/ton-connect/overview)
 - [Next.js Documentation](https://nextjs.org/docs)
-- [shadcn/ui Components](https://ui.shadcn.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
 
 ---
 
 ## 📄 License
 
-MIT License — Feel free to use this boilerplate for your projects!
+MIT License — Free to use for personal and commercial projects.
 
 ---
 
-Built with ❤️ for the Telegram Mini App ecosystem
+<div align="center">
+  <p>Built with ❤️ for the TON Ecosystem</p>
+  <p><i>Looking for premium features? Contact the author!</i></p>
+</div>

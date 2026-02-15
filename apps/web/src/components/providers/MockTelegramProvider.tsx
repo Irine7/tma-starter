@@ -8,28 +8,28 @@ import type { TelegramUser } from '@tma/shared';
  * Mock user data for development
  */
 const MOCK_USER: TelegramUser = {
-  id: 123456789,
-  first_name: 'Dev',
-  last_name: 'User',
-  username: 'devuser',
-  photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=telegram-dev',
-  language_code: 'en',
-  is_premium: false,
+	id: 123456789,
+	first_name: 'Super Dev',
+	last_name: 'User',
+	username: 'devuser',
+	photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=telegram-dev',
+	language_code: 'en',
+	is_premium: false,
 };
 
 /**
  * Generate mock initData string for development
  */
 function generateMockInitData(user: TelegramUser): string {
-  const userString = encodeURIComponent(JSON.stringify(user));
-  const authDate = Math.floor(Date.now() / 1000);
-  const hash = 'mock_hash_for_development_only';
-  
-  return `user=${userString}&auth_date=${authDate}&hash=${hash}`;
+	const userString = encodeURIComponent(JSON.stringify(user));
+	const authDate = Math.floor(Date.now() / 1000);
+	const hash = 'mock_hash_for_development_only';
+
+	return `user=${userString}&auth_date=${authDate}&hash=${hash}`;
 }
 
 interface MockTelegramProviderProps {
-  children: ReactNode;
+	children: ReactNode;
 }
 
 /**
@@ -44,80 +44,80 @@ interface MockTelegramProviderProps {
  * - Allows testing without deploying to Telegram
  */
 export function MockTelegramProvider({ children }: MockTelegramProviderProps) {
-  const [contextValue, setContextValue] = useState<TelegramContextValue>({
-    user: null,
-    initData: null,
-    isInTelegram: false,
-    isMockMode: false,
-    isLoading: true,
-    webApp: null,
-  });
+	const [contextValue, setContextValue] = useState<TelegramContextValue>({
+		user: null,
+		initData: null,
+		isInTelegram: false,
+		isMockMode: false,
+		isLoading: true,
+		webApp: null,
+	});
 
-  useEffect(() => {
-    // Check if running inside Telegram
-    const telegram = window.Telegram;
-    const webApp = telegram?.WebApp;
+	useEffect(() => {
+		// Check if running inside Telegram
+		const telegram = window.Telegram;
+		const webApp = telegram?.WebApp;
 
-    if (webApp && webApp.initData) {
-      // Running inside Telegram - use real data
-      const user = webApp.initDataUnsafe?.user;
-      
-      setContextValue({
-        user: user ? {
-          id: user.id,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          username: user.username,
-          photo_url: user.photo_url,
-          language_code: user.language_code,
-          is_premium: user.is_premium,
-        } : null,
-        initData: webApp.initData,
-        isInTelegram: true,
-        isMockMode: false,
-        isLoading: false,
-        webApp: webApp,
-      });
+		if (webApp && webApp.initData) {
+			// Running inside Telegram - use real data
+			const user = webApp.initDataUnsafe?.user;
 
-      // Signal to Telegram that the app is ready
-      webApp.ready();
-      webApp.expand();
-      
-      // Request fullscreen mode on mobile platforms only
-      // This makes the app background extend behind the notch/status bar area
-      const mobilePlatforms = ['android', 'ios'];
-      const platform = webApp.platform?.toLowerCase() || '';
-      const isMobile = mobilePlatforms.some(p => platform.includes(p));
-      
-      if (isMobile && webApp.requestFullscreen) {
-        webApp.requestFullscreen();
-      }
-    } else {
-      // Development mode - use mock data
-      console.log('🔧 [TMA] Running in development mode with mock Telegram data');
-      
-      setContextValue({
-        user: MOCK_USER,
-        initData: generateMockInitData(MOCK_USER),
-        isInTelegram: false,
-        isMockMode: true,
-        isLoading: false,
-        webApp: null,
-      });
-    }
-  }, []);
+			setContextValue({
+				user: user ? {
+					id: user.id,
+					first_name: user.first_name,
+					last_name: user.last_name,
+					username: user.username,
+					photo_url: user.photo_url,
+					language_code: user.language_code,
+					is_premium: user.is_premium,
+				} : null,
+				initData: webApp.initData,
+				isInTelegram: true,
+				isMockMode: false,
+				isLoading: false,
+				webApp: webApp,
+			});
 
-  return (
-    <TelegramContext.Provider value={contextValue}>
-      {/* Development Mode Banner */}
-      {contextValue.isMockMode && !contextValue.isLoading && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-primary text-center py-1.5 text-sm font-medium shadow-md">
-          <span className="mr-2">🔧</span>
-          Development Mode — Using mock Telegram data
-        </div>
-      )}
-      
-      {children}
-    </TelegramContext.Provider>
-  );
+			// Signal to Telegram that the app is ready
+			webApp.ready();
+			webApp.expand();
+
+			// Request fullscreen mode on mobile platforms only
+			// This makes the app background extend behind the notch/status bar area
+			const mobilePlatforms = ['android', 'ios'];
+			const platform = webApp.platform?.toLowerCase() || '';
+			const isMobile = mobilePlatforms.some(p => platform.includes(p));
+
+			if (isMobile && webApp.requestFullscreen) {
+				webApp.requestFullscreen();
+			}
+		} else {
+			// Development mode - use mock data
+			console.log('🔧 [TMA] Running in development mode with mock Telegram data');
+
+			setContextValue({
+				user: MOCK_USER,
+				initData: generateMockInitData(MOCK_USER),
+				isInTelegram: false,
+				isMockMode: true,
+				isLoading: false,
+				webApp: null,
+			});
+		}
+	}, [MOCK_USER]);
+
+	return (
+		<TelegramContext.Provider value={contextValue}>
+			{/* Development Mode Banner */}
+			{contextValue.isMockMode && !contextValue.isLoading && (
+				<div className="fixed top-0 left-0 right-0 z-50 bg-primary text-center py-1.5 text-sm font-medium shadow-md">
+					<span className="mr-2">🔧</span>
+					Development Mode — Using mock Telegram data
+				</div>
+			)}
+
+			{children}
+		</TelegramContext.Provider>
+	);
 }

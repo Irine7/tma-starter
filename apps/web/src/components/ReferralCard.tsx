@@ -53,7 +53,7 @@ export function ReferralCard({ className = '' }: ReferralCardProps) {
     }
 
     const referralUrl = `https://t.me/tma_starter_bot/starter?startapp=${user.referral_code}`;
-    const shareText = 'Присоединяйся и получи 1000 корон!';
+    const shareText = 'Join my Telegram mini app!';
 
     // Check if we're actually running inside Telegram WebApp
     const isInTelegram = typeof window !== 'undefined' && 

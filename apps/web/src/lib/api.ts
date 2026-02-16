@@ -10,9 +10,15 @@ import type { ApiResponse, HealthResponse } from '@tma/shared';
  * - In production (Vercel): use NEXT_PUBLIC_API_URL (full URL of deployed API)
  * - In development: use /api (proxied via Next.js rewrites to localhost:3001)
  * - Fallback: http://localhost:3001
+ * 
+ * NOTE: Trailing slashes are stripped to prevent double-slash URLs
+ * (e.g. https://api.vercel.app//health) which cause CORS preflight failures
+ * because Vercel redirects double-slash URLs, and redirects are not allowed
+ * for CORS preflight (OPTIONS) requests.
  */
 function getApiBaseUrl(): string {
-	return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+	const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+	return url.replace(/\/+$/, '');
 }
 
 // ===========================================

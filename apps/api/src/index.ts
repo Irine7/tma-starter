@@ -6,8 +6,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 import express, { Application } from 'express';
 import { corsMiddleware } from './middleware/cors';
 import {
-  validateTelegramData,
-  optionalTelegramData,
+	validateTelegramData,
+	optionalTelegramData,
 } from './middleware/validateTelegramData';
 import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
@@ -49,17 +49,17 @@ app.use('/auth', authRoutes);
 // ===========================================
 
 app.get('/', (_req, res) => {
-  res.json({
-    name: 'TMA Boilerplate API',
-    version: '1.0.0',
-    description: 'Telegram Mini App Backend Server',
-    endpoints: {
-      health: '/health',
-      healthReady: '/health/ready',
-      healthLive: '/health/live',
-    },
-    documentation: 'https://github.com/your-repo/tma-boilerplate',
-  });
+	res.json({
+		name: 'TMA Boilerplate API',
+		version: '1.0.0',
+		description: 'Telegram Mini App Backend Server',
+		endpoints: {
+			health: '/health',
+			healthReady: '/health/ready',
+			healthLive: '/health/live',
+		},
+		documentation: 'https://github.com/your-repo/tma-boilerplate',
+	});
 });
 
 // ===========================================
@@ -67,46 +67,49 @@ app.get('/', (_req, res) => {
 // ===========================================
 
 app.use(
-  (
-    err: Error,
-    _req: express.Request,
-    res: express.Response,
-    _next: express.NextFunction
-  ) => {
-    console.error('Unhandled error:', err);
+	(
+		err: Error,
+		_req: express.Request,
+		res: express.Response,
+		_next: express.NextFunction
+	) => {
+		console.error('Unhandled error:', err);
 
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message:
-          process.env.NODE_ENV === 'production'
-            ? 'An unexpected error occurred'
-            : err.message,
-      },
-      timestamp: Date.now(),
-    });
-  }
+		res.status(500).json({
+			success: false,
+			error: {
+				code: 'INTERNAL_SERVER_ERROR',
+				message:
+					process.env.NODE_ENV === 'production'
+						? 'An unexpected error occurred'
+						: err.message,
+			},
+			timestamp: Date.now(),
+		});
+	}
 );
 
 // ===========================================
 // Start Server
 // ===========================================
 
-app.listen(PORT, () => {
-  console.log('');
-  console.log('🚀 TMA Boilerplate API Server');
-  console.log('============================');
-  console.log(`📡 Server running on http://localhost:${PORT}`);
-  console.log(`❤️  Health check: http://localhost:${PORT}/health`);
-  console.log('');
+// Only start server if we're not in a serverless environment (Vercel)
+if (process.env.VERCEL !== '1') {
+	app.listen(PORT, () => {
+		console.log('');
+		console.log('🚀 TMA Boilerplate API Server');
+		console.log('============================');
+		console.log(`📡 Server running on http://localhost:${PORT}`);
+		console.log(`❤️  Health check: http://localhost:${PORT}/health`);
+		console.log('');
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('⚠️  Running in DEVELOPMENT mode');
-    console.log('   Telegram initData validation is relaxed');
-    console.log('');
-  }
-});
+		if (process.env.NODE_ENV !== 'production') {
+			console.log('⚠️  Running in DEVELOPMENT mode');
+			console.log('   Telegram initData validation is relaxed');
+			console.log('');
+		}
+	});
+}
 
 // Export for testing
 export default app;

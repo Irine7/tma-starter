@@ -7,21 +7,12 @@ import type { ApiResponse, HealthResponse } from '@tma/shared';
 
 /**
  * Get the correct API base URL based on environment
- * - In Telegram WebApp: use NEXT_PUBLIC_API_URL (ngrok)
- * - In browser (mock mode): use localhost
+ * - In production (Vercel): use NEXT_PUBLIC_API_URL (full URL of deployed API)
+ * - In development: use /api (proxied via Next.js rewrites to localhost:3001)
+ * - Fallback: http://localhost:3001
  */
 function getApiBaseUrl(): string {
-	// Check if we're in Telegram Mini App
-	if (typeof window !== 'undefined') {
-		const webApp = window.Telegram?.WebApp;
-		if (webApp?.initData) {
-			// Real Telegram environment - use ngrok URL
-			return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-		}
-	}
-
-	// Browser/mock mode - always use localhost
-	return 'http://localhost:3001';
+	return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 }
 
 // ===========================================
